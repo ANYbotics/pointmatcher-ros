@@ -246,7 +246,7 @@ namespace PointMatcher_ros
           rosMsg.header.frame_id,
           fixedFrame,
           curTime,
-          ros::Duration(0.1)
+          ros::Duration(1.0)
         );
 
         // transform data
@@ -270,7 +270,7 @@ namespace PointMatcher_ros
         }
         catch (const tf::ExtrapolationException& e)
         {
-          //ROS_WARN_STREAM("libpointmatcher_ros: Couldn't transform point: " << e.what());
+          //ROS_WARN_STREAM("Couldn't transform point: " << e.what());
           return DataPoints();
         }
 
@@ -314,7 +314,6 @@ namespace PointMatcher_ros
       }
     }
 		
-
 		//cerr << "point cloud:\n" << cloud.features.leftCols(10) << endl;
 		return cloud;
 	}
