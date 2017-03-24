@@ -11,8 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
 )
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(PM libpointmatcher REQUIRED)
+find_package(libpointmatcher REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -44,12 +43,20 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 add_definitions(-DHAVE_YAML_CPP)
 include_directories(
   include
-  ${PM_INCLUDE_DIRS}
+  ${LIBPOINTMATCHER_INCLUDE_DIRS}
 )
 
-add_library(pointmatcher_ros src/point_cloud.cpp src/transform.cpp)
-include_directories(${catkin_INCLUDE_DIRS})
-target_link_libraries(pointmatcher_ros ${catkin_LIBRARIES} ${PM_LIBRARIES})
+add_library(pointmatcher_ros
+  src/point_cloud.cpp
+  src/transform.cpp
+)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
+target_link_libraries(pointmatcher_ros
+  ${catkin_LIBRARIES}
+  ${LIBPOINTMATCHER_LIBRARIES}
+)
 
 install(TARGETS pointmatcher_ros
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
