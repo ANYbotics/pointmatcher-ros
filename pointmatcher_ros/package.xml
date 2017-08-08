@@ -17,6 +17,7 @@
   <depend>tf</depend>
   <depend>tf_conversions</depend>
   <depend>eigen_conversions</depend>
+  <depend>libpointmatcher-dev</depend>
 
 </package>
 
