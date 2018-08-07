@@ -1,11 +1,13 @@
 <package format="2">
+
   <name>pointmatcher_ros</name>
   <description>
      Bridge between libpointmatcher and ROS.
   </description>
   <version>0.9.9</version>
-  <maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+  <maintainer email="rdiethelm@anybotics.com">Remo Diethelm</maintainer>
   <author>Stéphane Magnenat</author>
+  <author>Francois Pomerleau</author>
   <license>new BSD</license>
   <url>http://ros.org/wiki/libpointmatcher_ros</url>
 
@@ -20,5 +22,3 @@
   <depend>libpointmatcher-dev</depend>
 
 </package>
-
-
