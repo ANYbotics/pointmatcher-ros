@@ -4,7 +4,7 @@
   <description>
      Bridge between libpointmatcher and ROS.
   </description>
-  <version>0.9.9</version>
+  <version>1.0.0</version>
   <maintainer email="rdiethelm@anybotics.com">Remo Diethelm</maintainer>
   <author>Stéphane Magnenat</author>
   <author>Francois Pomerleau</author>
