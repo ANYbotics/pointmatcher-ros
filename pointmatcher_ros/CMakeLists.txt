@@ -12,17 +12,22 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(libpointmatcher REQUIRED)
+find_package(PCL 1.7 REQUIRED)
+add_definitions(${PCL_DEFINITIONS})
 
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES pointmatcher_ros
+  INCLUDE_DIRS 
+    include
+    ${PCL_INCLUDE_DIRS}
+  LIBRARIES
+    pointmatcher_ros
   CATKIN_DEPENDS
-  roscpp
-  sensor_msgs
-  nav_msgs
-  tf
-  tf_conversions
-  eigen_conversions
+    roscpp
+    sensor_msgs
+    nav_msgs
+    tf
+    tf_conversions
+    eigen_conversions
 )
 
 # c++ 0x
@@ -49,13 +54,20 @@ include_directories(
 add_library(pointmatcher_ros
   src/point_cloud.cpp
   src/transform.cpp
+  src/StampedPointCloud.cpp
+  src/PmTf.cpp
+  src/PointMatcherFilterIface.cpp
+  src/helper_functions.cpp
 )
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
 target_link_libraries(pointmatcher_ros
   ${catkin_LIBRARIES}
   ${LIBPOINTMATCHER_LIBRARIES}
+  ${PCL_COMMON_LIBRARIES}
+  ${PCL_IO_LIBRARIES}
 )
 
 install(TARGETS pointmatcher_ros
