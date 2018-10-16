@@ -1,6 +1,5 @@
 // PointMatcher_ros
 #include "pointmatcher_ros/StampedPointCloud.h"
-#include "pointmatcher_ros/Macros.h"
 
 namespace PointMatcher_ros {
 
@@ -28,11 +27,11 @@ bool StampedPointCloud::fromFile(const std::string& filePath, const ros::Time& s
   const unsigned int size = pointCloudPcl.size();
   for (auto point = pointCloudPcl.end(); point >= pointCloudPcl.begin(); point--) {
     if (std::isnan(point->curvature)) {
-      ROS_DEBUG_STREAM("IcpTools: Removing point (" << std::distance(pointCloudPcl.begin(), point) << ") with curvature == NaN.");
+      ROS_DEBUG_STREAM("PointMatcher_ros: Removing point (" << std::distance(pointCloudPcl.begin(), point) << ") with curvature == NaN.");
       pointCloudPcl.erase(point);
     }
   }
-  ROS_INFO_STREAM("IcpTools: Erased " << size - pointCloudPcl.size() << " invalid points from the point cloud.");
+  ROS_INFO_STREAM("PointMatcher_ros: Erased " << size - pointCloudPcl.size() << " invalid points from the point cloud.");
 
   sensor_msgs::PointCloud2 pointCloudRos;
   pcl::toROSMsg(pointCloudPcl, pointCloudRos);
@@ -109,17 +108,13 @@ PmDataPointsConstView StampedPointCloud::getDescriptorConstView(const std::strin
   return dataPoints_.getDescriptorViewByName(name);
 }
 
-void StampedPointCloud::setCurvatureFromStaticProbability() {
-  dataPoints_.addDescriptor(PM_ROS_DESC_NAME_CURVATURE, dataPoints_.getDescriptorViewByName(PM_ROS_DESC_NAME_PROB_STATIC));
-}
-
-void StampedPointCloud::setStaticProbabilityFromCurvature() {
-  dataPoints_.addDescriptor(PM_ROS_DESC_NAME_PROB_STATIC, dataPoints_.getDescriptorViewByName(PM_ROS_DESC_NAME_CURVATURE));
+void StampedPointCloud::setDescriptorFromDescriptor(const std::string& sourceDescriptorName, const std::string& targetDescriptorName) {
+  dataPoints_.addDescriptor(sourceDescriptorName, dataPoints_.getDescriptorViewByName(targetDescriptorName));
 }
 
 bool StampedPointCloud::transform(const PmTf& tf) {
   if (tf.sourceFrameId_ != header_.frame_id) {
-    ROS_ERROR_STREAM("IcpTools: Point cloud transformation failed due to inconsistent frames. "
+    ROS_ERROR_STREAM("PointMatcher_ros: Point cloud transformation failed due to inconsistent frames. "
                      << "Point cloud frame: '" << header_.frame_id << "', transformation source frame: '" << tf.sourceFrameId_ << "'.");
     return false;
   }
@@ -128,7 +123,7 @@ bool StampedPointCloud::transform(const PmTf& tf) {
     dataPoints_ = transformator_->compute(dataPoints_, tf.parameters_);
     return true;
   } catch (const std::exception& exception) {
-    ROS_ERROR_STREAM("IcpTools: Caught exception while transforming point cloud: " << exception.what());
+    ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while transforming point cloud: " << exception.what());
     return false;
   }
 }
@@ -138,7 +133,7 @@ bool StampedPointCloud::filter(PmPointCloudFilters& filters) {
     filters.apply(dataPoints_);
     return true;
   } catch (const std::exception& exception) {
-    ROS_ERROR_STREAM("IcpTools: Caught exception while filtering point cloud: " << exception.what());
+    ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while filtering point cloud: " << exception.what());
     return false;
   }
 }
@@ -163,35 +158,36 @@ void StampedPointCloud::filterByDistance(const float distanceThreshold, const bo
   newIdToOldId.conservativeResize(Eigen::NoChange, newId);
 }
 
-void StampedPointCloud::filterByStaticProbability(const float staticProbabilityThreshold, const bool keepStatic) {
-  StampedPointCloud staticPoints;
-  StampedPointCloud dynamicPoints;
-  splitByStaticProbability(staticProbabilityThreshold, staticPoints, dynamicPoints);
+void StampedPointCloud::filterByThresholding(const std::string& descriptorName, const float staticProbabilityThreshold,
+                                             const bool keepStatic) {
+  StampedPointCloud pointsUnderThreshold;
+  StampedPointCloud pointsOverThreshold;
+  splitPointsByThresholding(descriptorName, staticProbabilityThreshold, pointsUnderThreshold, pointsOverThreshold);
   if (keepStatic) {
-    *this = staticPoints;
+    *this = pointsOverThreshold;
   } else {
-    *this = dynamicPoints;
+    *this = pointsUnderThreshold;
   }
 }
 
 bool StampedPointCloud::add(const StampedPointCloud& other) {
   if (other.header_.frame_id != header_.frame_id) {
-    ROS_ERROR_STREAM("IcpTools: Point cloud concatenation failed due to inconsistent frames. "
+    ROS_ERROR_STREAM("PointMatcher_ros: Point cloud concatenation failed due to inconsistent frames. "
                      << "This frame: '" << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
     return false;
   }
 
   if (other.isEmpty()) {
-    ROS_WARN_STREAM("IcpTools: Point cloud to add is empty, concatenation is not executed.");
+    ROS_WARN_STREAM("PointMatcher_ros: Point cloud to add is empty, concatenation is not executed.");
   } else if (dataPoints_.features.rows() != other.dataPoints_.features.rows()) {
-    ROS_INFO_STREAM("IcpTools: Point clouds to concatenate have different features, overwriting them.");
+    ROS_INFO_STREAM("PointMatcher_ros: Point clouds to concatenate have different features, overwriting them.");
     dataPoints_ = other.dataPoints_;
   } else {
-    ROS_DEBUG_STREAM("IcpTools: Concatenating point clouds of sizes " << getSize() << " and " << other.getSize() << " ...");
+    ROS_DEBUG_STREAM("PointMatcher_ros: Concatenating point clouds of sizes " << getSize() << " and " << other.getSize() << " ...");
     try {
       dataPoints_.concatenate(other.dataPoints_);
     } catch (const std::exception& exception) {
-      ROS_ERROR_STREAM("IcpTools: Caught exception while concatenating point clouds: " << exception.what());
+      ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while concatenating point clouds: " << exception.what());
       return false;
     }
   }
@@ -205,23 +201,23 @@ bool StampedPointCloud::addNonOverlappingPoints(const StampedPointCloud& other, 
   StampedPointCloud otherOverlappingPoints;
   StampedPointCloud otherNonOverlappingPoints;
   if (!splitByOverlap(other, maxDistOverlappingPoints, otherOverlappingPoints, otherNonOverlappingPoints)) {
-    ROS_ERROR_STREAM("IcpTools: Overlap could not be found.");
+    ROS_ERROR_STREAM("PointMatcher_ros: Overlap could not be found.");
     return false;
   }
 
   // Only add the non-overlapping points.
   if (!add(otherNonOverlappingPoints)) {
-    ROS_ERROR_STREAM("IcpTools: Non-overlapping points could not be added.");
+    ROS_ERROR_STREAM("PointMatcher_ros: Non-overlapping points could not be added.");
     return false;
   }
 
   return true;
 }
 
-bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const float distanceThreshold, StampedPointCloud& otherOverlappingPoints,
-                                  StampedPointCloud& otherNonOverlappingPoints) const {
+bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const float distanceThreshold,
+                                       StampedPointCloud& otherOverlappingPoints, StampedPointCloud& otherNonOverlappingPoints) const {
   if (other.header_.frame_id != header_.frame_id) {
-    ROS_ERROR_STREAM("IcpTools: Point cloud finding overlap failed due to inconsistent frames. "
+    ROS_ERROR_STREAM("PointMatcher_ros: Point cloud finding overlap failed due to inconsistent frames. "
                      << "This frame: '" << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
     return false;
   }
@@ -262,45 +258,45 @@ bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const flo
   return true;
 }
 
-void StampedPointCloud::splitByStaticProbability(const float staticProbabilityThreshold, StampedPointCloud& staticPoints,
-                                            StampedPointCloud& dynamicPoints) const {
-  if (!descriptorExists(PM_ROS_DESC_NAME_PROB_STATIC)) {
+void StampedPointCloud::splitPointsByThresholding(const std::string& descriptorName, const float threshold,
+                                                  StampedPointCloud& pointsUnderThreshold, StampedPointCloud& pointsOverThreshold) const {
+  if (!descriptorExists(descriptorName)) {
     // This can happen e.g. for empty maps.
-    ROS_DEBUG_STREAM("The point cloud does not contain the static probability descriptor.");
+    ROS_DEBUG_STREAM("The point cloud does not contain the descriptor '" << descriptorName << "'.");
     // Similar behavior as countStaticPoints(..):
-    staticPoints = *this;
-    dynamicPoints = createSimilarEmpty();
+    pointsOverThreshold = *this;
+    pointsUnderThreshold = createSimilarEmpty();
     return;
   }
 
-  const PmDataPointsConstView staticProbability = getDescriptorConstView(PM_ROS_DESC_NAME_PROB_STATIC);
-  staticPoints = createSimilarEmpty();
-  dynamicPoints = createSimilarEmpty();
-  unsigned int staticPointsCount = 0;
-  unsigned int dynamicPointsCount = 0;
+  const PmDataPointsConstView descriptorValues = getDescriptorConstView(descriptorName);
+  pointsOverThreshold = createSimilarEmpty();
+  pointsUnderThreshold = createSimilarEmpty();
+  unsigned int pointsOverThresholdCount = 0;
+  unsigned int pointsUnderThresholdCount = 0;
   for (unsigned int i = 0; i < getSize(); i++) {
-    if (staticProbability(0, i) >= staticProbabilityThreshold) {
-      staticPoints.dataPoints_.setColFrom(staticPointsCount, dataPoints_, i);
-      staticPointsCount++;
+    if (descriptorValues(0, i) >= threshold) {
+      pointsOverThreshold.dataPoints_.setColFrom(pointsOverThresholdCount, dataPoints_, i);
+      pointsOverThresholdCount++;
     } else {
-      dynamicPoints.dataPoints_.setColFrom(dynamicPointsCount, dataPoints_, i);
-      dynamicPointsCount++;
+      pointsUnderThreshold.dataPoints_.setColFrom(pointsUnderThresholdCount, dataPoints_, i);
+      pointsUnderThresholdCount++;
     }
   }
-  staticPoints.dataPoints_.conservativeResize(staticPointsCount);
-  dynamicPoints.dataPoints_.conservativeResize(dynamicPointsCount);
+  pointsOverThreshold.dataPoints_.conservativeResize(pointsOverThresholdCount);
+  pointsUnderThreshold.dataPoints_.conservativeResize(pointsUnderThresholdCount);
 }
 
-unsigned int StampedPointCloud::countStaticPoints(const float staticProbabilityThreshold) const {
-  if (!descriptorExists(PM_ROS_DESC_NAME_PROB_STATIC)) {
+unsigned int StampedPointCloud::countPointsOverThreshold(const std::string& descriptorName, const float threshold) const {
+  if (!descriptorExists(descriptorName)) {
     // This can happen e.g. for empty maps.
-    ROS_DEBUG_STREAM("The point cloud does not contain the static probability descriptor.");
+    ROS_DEBUG_STREAM("The point cloud does not contain the descriptor '" << descriptorName << "'.");
     // Similar behavior as splitByStaticProbability(..):
     return getSize();
   }
 
-  const PmDataPointsConstView staticProbability = getDescriptorConstView(PM_ROS_DESC_NAME_PROB_STATIC);
-  return (staticProbability.array() >= staticProbabilityThreshold).count();
+  const PmDataPointsConstView descriptorValues = getDescriptorConstView(descriptorName);
+  return (descriptorValues.array() >= threshold).count();
 }
 
 PmMatrix StampedPointCloud::toSphericalCoordinates() const {

@@ -51,24 +51,24 @@ class StampedPointCloud {
   void addOneDimensionalDescriptor(const std::string& name, const float value);
   PmDataPointsView getDescriptorView(const std::string& name);
   PmDataPointsConstView getDescriptorConstView(const std::string& name) const;
-  void setCurvatureFromStaticProbability();
-  void setStaticProbabilityFromCurvature();
+  void setDescriptorFromDescriptor(const std::string& sourceDescriptorName, const std::string& targetDescriptorName);
 
   bool transform(const PmTf& tf);
 
   bool filter(PmPointCloudFilters& filters);
   void filterByDistance(const float distanceThreshold, const bool keepInside);
   void filterByDistance(const float distanceThreshold, const bool keepInside, PmMatrix& newIdToOldId);
-  void filterByStaticProbability(const float staticProbabilityThreshold, const bool keepStatic);
+  void filterByThresholding(const std::string& descriptorName, const float staticProbabilityThreshold, const bool keepStatic);
 
   bool add(const StampedPointCloud& other);
   bool addNonOverlappingPoints(const StampedPointCloud& other, const float maxDistOverlappingPoints);
 
   bool splitByOverlap(const StampedPointCloud& other, const float distanceThreshold, StampedPointCloud& otherOverlappingPoints,
                       StampedPointCloud& otherNonOverlappingPoints) const;
-  void splitByStaticProbability(const float staticProbabilityThreshold, StampedPointCloud& staticPoints, StampedPointCloud& dynamicPoints) const;
+  void splitPointsByThresholding(const std::string& descriptorName, const float threshold, StampedPointCloud& pointsUnderThreshold,
+                                 StampedPointCloud& pointsOverThreshold) const;
 
-  unsigned int countStaticPoints(const float staticProbabilityThreshold) const;
+  unsigned int countPointsOverThreshold(const std::string& descriptorName, const float threshold) const;
 
   PmMatrix toSphericalCoordinates() const;
 };
