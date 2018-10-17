@@ -58,14 +58,14 @@ class StampedPointCloud {
   bool filter(PmPointCloudFilters& filters);
   void filterByDistance(const float distanceThreshold, const bool keepInside);
   void filterByDistance(const float distanceThreshold, const bool keepInside, PmMatrix& newIdToOldId);
-  void filterByThresholding(const std::string& descriptorName, const float staticProbabilityThreshold, const bool keepStatic);
+  void filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold, const bool keepStatic);
 
   bool add(const StampedPointCloud& other);
   bool addNonOverlappingPoints(const StampedPointCloud& other, const float maxDistOverlappingPoints);
 
   bool splitByOverlap(const StampedPointCloud& other, const float distanceThreshold, StampedPointCloud& otherOverlappingPoints,
                       StampedPointCloud& otherNonOverlappingPoints) const;
-  void splitPointsByThresholding(const std::string& descriptorName, const float threshold, StampedPointCloud& pointsUnderThreshold,
+  void splitByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold, StampedPointCloud& pointsUnderThreshold,
                                  StampedPointCloud& pointsOverThreshold) const;
 
   unsigned int countPointsOverThreshold(const std::string& descriptorName, const float threshold) const;

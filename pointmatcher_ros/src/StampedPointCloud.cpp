@@ -158,11 +158,11 @@ void StampedPointCloud::filterByDistance(const float distanceThreshold, const bo
   newIdToOldId.conservativeResize(Eigen::NoChange, newId);
 }
 
-void StampedPointCloud::filterByThresholding(const std::string& descriptorName, const float staticProbabilityThreshold,
+void StampedPointCloud::filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold,
                                              const bool keepStatic) {
   StampedPointCloud pointsUnderThreshold;
   StampedPointCloud pointsOverThreshold;
-  splitPointsByThresholding(descriptorName, staticProbabilityThreshold, pointsUnderThreshold, pointsOverThreshold);
+  splitByThresholding(descriptorName, descriptorDimension, threshold, pointsUnderThreshold, pointsOverThreshold);
   if (keepStatic) {
     *this = pointsOverThreshold;
   } else {
@@ -258,7 +258,7 @@ bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const flo
   return true;
 }
 
-void StampedPointCloud::splitPointsByThresholding(const std::string& descriptorName, const float threshold,
+void StampedPointCloud::splitByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold,
                                                   StampedPointCloud& pointsUnderThreshold, StampedPointCloud& pointsOverThreshold) const {
   if (!descriptorExists(descriptorName)) {
     // This can happen e.g. for empty maps.
@@ -275,7 +275,7 @@ void StampedPointCloud::splitPointsByThresholding(const std::string& descriptorN
   unsigned int pointsOverThresholdCount = 0;
   unsigned int pointsUnderThresholdCount = 0;
   for (unsigned int i = 0; i < getSize(); i++) {
-    if (descriptorValues(0, i) >= threshold) {
+    if (descriptorValues(descriptorDimension, i) >= threshold) {
       pointsOverThreshold.dataPoints_.setColFrom(pointsOverThresholdCount, dataPoints_, i);
       pointsOverThresholdCount++;
     } else {
@@ -291,7 +291,7 @@ unsigned int StampedPointCloud::countPointsOverThreshold(const std::string& desc
   if (!descriptorExists(descriptorName)) {
     // This can happen e.g. for empty maps.
     ROS_DEBUG_STREAM("The point cloud does not contain the descriptor '" << descriptorName << "'.");
-    // Similar behavior as splitByStaticProbability(..):
+    // Similar behavior as splitByThresholding(..):
     return getSize();
   }
 
