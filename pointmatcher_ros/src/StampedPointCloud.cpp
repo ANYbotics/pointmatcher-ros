@@ -159,11 +159,11 @@ void StampedPointCloud::filterByDistance(const float distanceThreshold, const bo
 }
 
 void StampedPointCloud::filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold,
-                                             const bool keepStatic) {
+                                             const bool keepOverThreshold) {
   StampedPointCloud pointsUnderThreshold;
   StampedPointCloud pointsOverThreshold;
   splitByThresholding(descriptorName, descriptorDimension, threshold, pointsUnderThreshold, pointsOverThreshold);
-  if (keepStatic) {
+  if (keepOverThreshold) {
     *this = pointsOverThreshold;
   } else {
     *this = pointsUnderThreshold;

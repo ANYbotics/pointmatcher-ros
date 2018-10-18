@@ -3,12 +3,13 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pointmatcher_ros)
 
 find_package(catkin REQUIRED COMPONENTS
+  eigen_conversions
+  nav_msgs
+  pcl_conversions
   roscpp
   sensor_msgs
-  nav_msgs
   tf
   tf_conversions
-  eigen_conversions
 )
 
 find_package(libpointmatcher REQUIRED)
@@ -22,12 +23,13 @@ catkin_package(
   LIBRARIES
     pointmatcher_ros
   CATKIN_DEPENDS
+    eigen_conversions
+    nav_msgs
+    pcl_conversions
     roscpp
     sensor_msgs
-    nav_msgs
     tf
     tf_conversions
-    eigen_conversions
 )
 
 # c++ 0x
