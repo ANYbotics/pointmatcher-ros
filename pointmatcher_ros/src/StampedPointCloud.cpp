@@ -158,6 +158,21 @@ void StampedPointCloud::filterByDistance(const float distanceThreshold, const bo
   newIdToOldId.conservativeResize(Eigen::NoChange, newId);
 }
 
+void StampedPointCloud::filterByBoundingBox(const float minX, const float maxX, const float minY, const float maxY, 
+                                            const float minZ, const float maxZ, const bool keepInside) {
+  unsigned int newId = 0;
+  for (unsigned int oldId = 0; oldId < getSize(); oldId++) {
+    const Eigen::Vector3f &point = dataPoints_.features.col(oldId);
+    if ((point.x() >= minX && point.x() <= maxX &&
+         point.y() >= minY && point.y() <= maxY &&
+         point.z() >= minZ && point.z() <= maxZ) == keepInside) {
+      dataPoints_.setColFrom(newId, dataPoints_, oldId);
+      newId++;
+    }
+  }
+  dataPoints_.conservativeResize(newId);
+}
+
 void StampedPointCloud::filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold,
                                              const bool keepOverThreshold) {
   StampedPointCloud pointsUnderThreshold;

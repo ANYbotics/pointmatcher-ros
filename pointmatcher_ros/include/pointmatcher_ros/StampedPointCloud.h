@@ -58,6 +58,7 @@ class StampedPointCloud {
   bool filter(PmPointCloudFilters& filters);
   void filterByDistance(const float distanceThreshold, const bool keepInside);
   void filterByDistance(const float distanceThreshold, const bool keepInside, PmMatrix& newIdToOldId);
+  void filterByBoundingBox(const float minX, const float maxX, const float minY, const float maxY, const float minZ, const float maxZ, const bool keepInside);
   void filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold, const bool keepOverThreshold);
 
   bool add(const StampedPointCloud& other);
