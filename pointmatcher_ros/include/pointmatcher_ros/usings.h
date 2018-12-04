@@ -18,6 +18,7 @@ using PmDataPoints = Pm::DataPoints;
 using PmDataPointsView = PmDataPoints::View;
 using PmDataPointsConstView = PmDataPoints::ConstView;
 using PmIcp = Pm::ICP;
+using PmPointCloudFilter = Pm::DataPointsFilter;
 using PmPointCloudFilters = Pm::DataPointsFilters;
 using PmTransformator = Pm::Transformation;
 using PmTfParameters = Pm::TransformationParameters;
