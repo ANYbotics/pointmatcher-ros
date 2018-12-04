@@ -128,6 +128,16 @@ bool StampedPointCloud::transform(const PmTf& tf) {
   }
 }
 
+bool StampedPointCloud::filter(PmPointCloudFilter& filter) {
+  try {
+    filter.inPlaceFilter(dataPoints_);
+    return true;
+  } catch (const std::exception& exception) {
+    ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while filtering point cloud: " << exception.what());
+    return false;
+  }
+}
+
 bool StampedPointCloud::filter(PmPointCloudFilters& filters) {
   try {
     filters.apply(dataPoints_);
@@ -138,12 +148,12 @@ bool StampedPointCloud::filter(PmPointCloudFilters& filters) {
   }
 }
 
-void StampedPointCloud::filterByDistance(const float distanceThreshold, const bool keepInside) {
+bool StampedPointCloud::filterByDistance(const float distanceThreshold, const bool keepInside) {
   PmMatrix dummy;
-  filterByDistance(distanceThreshold, keepInside, dummy);
+  return filterByDistance(distanceThreshold, keepInside, dummy);
 }
 
-void StampedPointCloud::filterByDistance(const float distanceThreshold, const bool keepInside, PmMatrix& newIdToOldId) {
+bool StampedPointCloud::filterByDistance(const float distanceThreshold, const bool keepInside, PmMatrix& newIdToOldId) {
   const float distanceThresholdSquared = std::pow(distanceThreshold, 2);
   newIdToOldId = PmMatrix(1, getSize());
   unsigned int newId = 0;
@@ -156,25 +166,26 @@ void StampedPointCloud::filterByDistance(const float distanceThreshold, const bo
   }
   dataPoints_.conservativeResize(newId);
   newIdToOldId.conservativeResize(Eigen::NoChange, newId);
+  return true;
 }
 
-void StampedPointCloud::filterByBoundingBox(const float minX, const float maxX, const float minY, const float maxY, 
-                                            const float minZ, const float maxZ, const bool keepInside) {
-  unsigned int newId = 0;
-  for (unsigned int oldId = 0; oldId < getSize(); oldId++) {
-    const Eigen::Vector3f &point = dataPoints_.features.col(oldId);
-    if ((point.x() >= minX && point.x() <= maxX &&
-         point.y() >= minY && point.y() <= maxY &&
-         point.z() >= minZ && point.z() <= maxZ) == keepInside) {
-      dataPoints_.setColFrom(newId, dataPoints_, oldId);
-      newId++;
-    }
-  }
-  dataPoints_.conservativeResize(newId);
+bool StampedPointCloud::filterByBoundingBox(const float xMin, const float xMax, const float yMin, const float yMax, const float zMin,
+                                            const float zMax, const bool keepInside) {
+  PmPointCloudFilter* boundingBoxFilter = Pm::get().DataPointsFilterRegistrar.create(
+      "BoundingBoxDataPointsFilter", {{"xMin", PointMatcherSupport::toParam(xMin)},
+                                      {"xMax", PointMatcherSupport::toParam(xMax)},
+                                      {"yMin", PointMatcherSupport::toParam(yMin)},
+                                      {"yMax", PointMatcherSupport::toParam(yMax)},
+                                      {"zMin", PointMatcherSupport::toParam(zMin)},
+                                      {"zMax", PointMatcherSupport::toParam(zMax)},
+                                      {"removeInside", PointMatcherSupport::toParam(!keepInside)}});
+  const bool success = filter(*boundingBoxFilter);
+  delete boundingBoxFilter;
+  return success;
 }
 
-void StampedPointCloud::filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold,
-                                             const bool keepOverThreshold) {
+bool StampedPointCloud::filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension,
+                                             const float threshold, const bool keepOverThreshold) {
   StampedPointCloud pointsUnderThreshold;
   StampedPointCloud pointsOverThreshold;
   splitByThresholding(descriptorName, descriptorDimension, threshold, pointsUnderThreshold, pointsOverThreshold);
@@ -183,6 +194,7 @@ void StampedPointCloud::filterByThresholding(const std::string& descriptorName, 
   } else {
     *this = pointsUnderThreshold;
   }
+  return true;
 }
 
 bool StampedPointCloud::add(const StampedPointCloud& other) {
@@ -273,8 +285,9 @@ bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const flo
   return true;
 }
 
-void StampedPointCloud::splitByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold,
-                                                  StampedPointCloud& pointsUnderThreshold, StampedPointCloud& pointsOverThreshold) const {
+void StampedPointCloud::splitByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension,
+                                            const float threshold, StampedPointCloud& pointsUnderThreshold,
+                                            StampedPointCloud& pointsOverThreshold) const {
   if (!descriptorExists(descriptorName)) {
     // This can happen e.g. for empty maps.
     ROS_DEBUG_STREAM("The point cloud does not contain the descriptor '" << descriptorName << "'.");
