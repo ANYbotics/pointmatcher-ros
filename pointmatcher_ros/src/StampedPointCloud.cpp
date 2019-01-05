@@ -171,7 +171,7 @@ bool StampedPointCloud::filterByDistance(const float distanceThreshold, const bo
 
 bool StampedPointCloud::filterByBoundingBox(const float xMin, const float xMax, const float yMin, const float yMax, const float zMin,
                                             const float zMax, const bool keepInside) {
-  PmPointCloudFilter* boundingBoxFilter = Pm::get().DataPointsFilterRegistrar.create(
+  std::shared_ptr<PmPointCloudFilter> boundingBoxFilter = Pm::get().DataPointsFilterRegistrar.create(
       "BoundingBoxDataPointsFilter", {{"xMin", PointMatcherSupport::toParam(xMin)},
                                       {"xMax", PointMatcherSupport::toParam(xMax)},
                                       {"yMin", PointMatcherSupport::toParam(yMin)},
@@ -180,7 +180,6 @@ bool StampedPointCloud::filterByBoundingBox(const float xMin, const float xMax, 
                                       {"zMax", PointMatcherSupport::toParam(zMax)},
                                       {"removeInside", PointMatcherSupport::toParam(!keepInside)}});
   const bool success = filter(*boundingBoxFilter);
-  delete boundingBoxFilter;
   return success;
 }
 
