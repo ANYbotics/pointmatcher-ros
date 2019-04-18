@@ -20,6 +20,8 @@ class PointMatcherFilterIface {
 
   PointMatcher<float>::DataPoints process(const PointMatcher<float>::DataPoints& input);
 
+  void processInPlace(PointMatcher<float>::DataPoints& input);
+
  private:
   std::string dataType_;
   PointMatcher<float>::DataPointsFilters filters_;
