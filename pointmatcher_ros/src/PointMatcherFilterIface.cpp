@@ -18,16 +18,22 @@ bool PointMatcherFilterIface::readPipelineFile(const std::string& fileName) {
 }
 
 PointMatcher<float>::DataPoints PointMatcherFilterIface::process(const PointMatcher<float>::DataPoints& input) {
+  // Copy input point cloud.
   auto localInput = input;
 
+  // Apply filters to point cloud.
+  processInPlace(localInput);
+
+  return localInput;
+}
+
+void PointMatcherFilterIface::processInPlace(PointMatcher<float>::DataPoints& input) {
   try {
-    filters_.apply(localInput);
+    filters_.apply(input);
   } catch (const std::runtime_error& e) {
     ROS_WARN_STREAM("PointMatcherFilterIface: Caught exception: " << e.what());
     ROS_WARN_STREAM("PointMatcherFilterIface: Point cloud unchanged");
   }
-
-  return localInput;
 }
 
 }  // namespace PointMatcher_ros
