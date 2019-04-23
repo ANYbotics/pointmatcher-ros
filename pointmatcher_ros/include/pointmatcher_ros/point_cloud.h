@@ -9,11 +9,12 @@
 namespace ros
 {
 	struct Time;
-};
+}
+
 namespace tf
 {
 	struct TransformListener;
-};
+}
 
 namespace PointMatcher_ros
 {
@@ -25,6 +26,6 @@ namespace PointMatcher_ros
 	
 	template<typename T>
 	sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id, const ros::Time& stamp);
-}; // PointMatcher_ros
+} // PointMatcher_ros
 
 #endif //__POINTMATCHER_ROS_POINT_CLOUD_H
