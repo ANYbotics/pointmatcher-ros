@@ -8,13 +8,14 @@
 namespace ros
 {
 	struct Time;
-};
+}
+
 namespace tf
 {
 	struct Transform;
 	struct TransformListener;
 	struct StampedTransform;
-};
+}
 
 namespace PointMatcher_ros
 {
@@ -51,6 +52,6 @@ namespace PointMatcher_ros
 	template<typename T>
 	typename PointMatcher<T>::TransformationParameters eigenMatrixToDim(const typename PointMatcher<T>::TransformationParameters& matrix, int dimp1);
 	
-}; // PointMatcher_ros
+} // PointMatcher_ros
 
 #endif //__POINTMATCHER_ROS_TRANSFORM_H
