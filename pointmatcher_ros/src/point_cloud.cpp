@@ -332,7 +332,6 @@ namespace PointMatcher_ros
 		typedef typename PM::DataPoints DataPoints;
 		typedef typename DataPoints::Label Label;
 		typedef typename DataPoints::Labels Labels;
-		typedef typename DataPoints::View View;
 		
 		Labels featLabels;
 		featLabels.push_back(Label("x", 1));

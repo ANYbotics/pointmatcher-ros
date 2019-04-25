@@ -189,4 +189,4 @@ namespace PointMatcher_ros
 	PointMatcher<float>::TransformationParameters eigenMatrixToDim<float>(const PointMatcher<float>::TransformationParameters& matrix, int dimp1);
 	template
 	PointMatcher<double>::TransformationParameters eigenMatrixToDim<double>(const PointMatcher<double>::TransformationParameters& matrix, int dimp1);
-}; // PointMatcher_ros
+} // PointMatcher_ros
