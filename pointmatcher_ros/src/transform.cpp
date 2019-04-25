@@ -1,6 +1,9 @@
 #include "pointmatcher_ros/transform.h"
+#pragma GCC diagnostic push // Get rid of compiler warnings we can't fix.
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "tf/transform_listener.h"
 #include "tf/transform_datatypes.h"
+#pragma GCC diagnostic pop // Back to normal warning handling.
 #include "tf_conversions/tf_eigen.h"
 #include "eigen_conversions/eigen_msg.h"
 #include "ros/ros.h"

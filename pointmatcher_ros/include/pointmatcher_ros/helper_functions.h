@@ -9,7 +9,10 @@
 #include <geometry_msgs/TransformStamped.h>
 
 // tf
+#pragma GCC diagnostic push // Get rid of compiler warnings we can't fix.
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <tf/tf.h>
+#pragma GCC diagnostic pop // Back to normal warning handling.
 
 // tf conversions
 #include <tf_conversions/tf_eigen.h>

@@ -6,7 +6,10 @@
 #include "boost/algorithm/string.hpp"
 //#include <boost/algorithm/string/predicate.hpp>
 //#include <boost/algorithm/string/erase.hpp>
+#pragma GCC diagnostic push // Get rid of compiler warnings we can't fix.
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "tf/transform_listener.h"
+#pragma GCC diagnostic pop // Back to normal warning handling.
 #include <vector>
 #include <memory>
 

@@ -10,7 +10,10 @@
 #include <pointmatcher_ros/point_cloud.h>
 
 // pcl
+#pragma GCC diagnostic push // Get rid of compiler warnings we can't fix.
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <pcl/io/ply_io.h>
+#pragma GCC diagnostic pop // Back to normal warning handling.
 
 // pcl conversions
 #include <pcl_conversions/pcl_conversions.h>

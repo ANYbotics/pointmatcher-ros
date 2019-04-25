@@ -10,7 +10,10 @@
 #include <geometry_msgs/TransformStamped.h>
 
 // tf
+#pragma GCC diagnostic push // Get rid of compiler warnings we can't fix.
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <tf/tf.h>
+#pragma GCC diagnostic pop // Back to normal warning handling.
 
 // pointmatcher_ros
 #include "pointmatcher_ros/usings.h"
