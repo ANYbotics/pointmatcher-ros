@@ -40,7 +40,10 @@ catkin_package(
 add_definitions(-DHAVE_YAML_CPP)
 include_directories(
   include
-  ${LIBPOINTMATCHER_INCLUDE_DIRS}
+  SYSTEM
+    ${LIBPOINTMATCHER_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
 )
 
 ########################
@@ -54,10 +57,7 @@ add_library(pointmatcher_ros
   src/PointMatcherFilterIface.cpp
   src/helper_functions.cpp
 )
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
-)
+
 target_link_libraries(pointmatcher_ros
   ${catkin_LIBRARIES}
   ${LIBPOINTMATCHER_LIBRARIES}
