@@ -59,9 +59,15 @@ void StampedPointCloud::fromRosMsg(const sensor_msgs::PointCloud2& msg) {
   dataPoints_ = PointMatcher_ros::rosMsgToPointMatcherCloud<float>(msg);
 }
 
-sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg() const {
+sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time& stamp) const {
   sensor_msgs::PointCloud2 msg;
   toRosMsg(msg);
+
+  // Check that the timestamp is well-defined.
+  if(stamp != ros::Time(0)) {
+    msg.header.stamp = stamp;
+  }
+
   return msg;
 }
 
