@@ -11,7 +11,7 @@
 
 namespace PointMatcher_ros {
 
-class PointMatcherFilterIface {
+class PointMatcherFilterInterface {
  public:
   std::string getDataType() const { return dataType_; }
   void setDataType(std::string newValue) { dataType_ = newValue; }

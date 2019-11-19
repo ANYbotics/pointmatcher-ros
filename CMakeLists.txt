@@ -54,7 +54,7 @@ add_library(pointmatcher_ros
   src/transform.cpp
   src/StampedPointCloud.cpp
   src/PmTf.cpp
-  src/PointMatcherFilterIface.cpp
+  src/PointMatcherFilterInterface.cpp
   src/helper_functions.cpp
 )
 
