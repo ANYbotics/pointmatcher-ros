@@ -94,8 +94,12 @@ namespace PointMatcher_ros
 			//else if (name == "stamps")
 			else if (name == "time")
 			{
-			  timeLabels.push_back(Label(name, count));
-        isFeature.push_back(false);
+			    // timeLabels.push_back(Label(name, count));
+				// fieldTypes.push_back(PM_types::TIME);
+				// TODO(Perception) Check if this is the best way to treat time point descriptors. Upstream libpointmatcher's design is designed differently.
+			  	descLabels.push_back(Label(name, count));
+        		isFeature.push_back(false);
+				fieldTypes.push_back(PM_types::DESCRIPTOR);
 			}
 			else
 			{
