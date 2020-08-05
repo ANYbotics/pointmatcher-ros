@@ -32,7 +32,7 @@ catkin_package(
     include
     ${PCL_INCLUDE_DIRS}
   LIBRARIES
-    pointmatcher_ros
+    ${PROJECT_NAME}
   CATKIN_DEPENDS
     ${CATKIN_PACKAGE_DEPENDENCIES}
 )
@@ -49,7 +49,7 @@ include_directories(
 ########################
 ## Library definition ##
 ########################
-add_library(pointmatcher_ros
+add_library(${PROJECT_NAME}
   src/point_cloud.cpp
   src/transform.cpp
   src/StampedPointCloud.cpp
@@ -58,7 +58,7 @@ add_library(pointmatcher_ros
   src/helper_functions.cpp
 )
 
-target_link_libraries(pointmatcher_ros
+target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
   ${LIBPOINTMATCHER_LIBRARIES}
   ${PCL_COMMON_LIBRARIES}
@@ -68,7 +68,7 @@ target_link_libraries(pointmatcher_ros
 #############
 ## Install ##
 #############
-install(TARGETS pointmatcher_ros
+install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -79,3 +79,41 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
 )
+
+#############
+## Testing ##
+#############
+if (CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED
+    COMPONENTS
+      ${CATKIN_PACKAGE_DEPENDENCIES}
+  )
+
+  include_directories(
+    include
+    SYSTEM
+      ${catkin_INCLUDE_DIRS}
+      ${LIBPOINTMATCHER_INCLUDE_DIRS}
+      ${PCL_INCLUDE_DIRS}
+  )
+
+  catkin_add_gtest(test_${PROJECT_NAME}
+    test/test_main.cpp
+  )
+
+  target_link_libraries(test_${PROJECT_NAME}
+    ${PROJECT_NAME}
+  )
+endif()
+
+
+###################
+## Code_coverage ##
+###################
+find_package(cmake_code_coverage QUIET)
+if(cmake_code_coverage_FOUND)
+  add_gtest_coverage(
+    TEST_BUILD_TARGETS
+      test_${PROJECT_NAME}
+  )
+endif(cmake_code_coverage_FOUND)
