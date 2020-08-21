@@ -8,6 +8,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 # Set catkin package dependencies
 set(CATKIN_PACKAGE_DEPENDENCIES
   eigen_conversions
+  libpointmatcher
   nav_msgs
   pcl_conversions
   roscpp
@@ -22,7 +23,6 @@ find_package(catkin
     ${CATKIN_PACKAGE_DEPENDENCIES}
 )
 
-find_package(libpointmatcher REQUIRED)
 find_package(PCL 1.7 REQUIRED)
 add_definitions(${PCL_DEFINITIONS})
 
@@ -41,7 +41,6 @@ add_definitions(-DHAVE_YAML_CPP)
 include_directories(
   include
   SYSTEM
-    ${LIBPOINTMATCHER_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
@@ -60,7 +59,6 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${LIBPOINTMATCHER_LIBRARIES}
   ${PCL_COMMON_LIBRARIES}
   ${PCL_IO_LIBRARIES}
 )
@@ -93,7 +91,6 @@ if (CATKIN_ENABLE_TESTING)
     include
     SYSTEM
       ${catkin_INCLUDE_DIRS}
-      ${LIBPOINTMATCHER_INCLUDE_DIRS}
       ${PCL_INCLUDE_DIRS}
   )
 
