@@ -54,6 +54,7 @@ class StampedPointCloud {
   void setDescriptorFromDescriptor(const std::string& sourceDescriptorName, const std::string& targetDescriptorName);
 
   bool transform(const PmTf& tf);
+  bool transform(const PmTfParameters& transform);
 
   bool filter(PmPointCloudFilter& filter);
   bool filter(PmPointCloudFilters& filters);

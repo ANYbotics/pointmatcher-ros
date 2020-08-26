@@ -119,14 +119,20 @@ void StampedPointCloud::setDescriptorFromDescriptor(const std::string& sourceDes
 }
 
 bool StampedPointCloud::transform(const PmTf& tf) {
+  // Validate the transformation frames.
   if (tf.sourceFrameId_ != header_.frame_id) {
     ROS_ERROR_STREAM("PointMatcher_ros: Point cloud transformation failed due to inconsistent frames. "
                      << "Point cloud frame: '" << header_.frame_id << "', transformation source frame: '" << tf.sourceFrameId_ << "'.");
     return false;
   }
   header_.frame_id = tf.targetFrameId_;
+  
+  return transform(tf.parameters_);
+}
+
+bool StampedPointCloud::transform(const PmTfParameters& transform) {
   try {
-    dataPoints_ = transformator_->compute(dataPoints_, tf.parameters_);
+    dataPoints_ = transformator_->compute(dataPoints_, transform);
     return true;
   } catch (const std::exception& exception) {
     ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while transforming point cloud: " << exception.what());
