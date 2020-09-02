@@ -87,30 +87,29 @@ if (CATKIN_ENABLE_TESTING)
       ${CATKIN_PACKAGE_DEPENDENCIES}
   )
 
-  include_directories(
-    include
-    SYSTEM
+  catkin_add_gtest(test_${PROJECT_NAME}
+    test/empty_test.cpp
+  )
+  target_include_directories(test_${PROJECT_NAME}
+    PRIVATE
+      include
+    PUBLIC SYSTEM
       ${catkin_INCLUDE_DIRS}
       ${PCL_INCLUDE_DIRS}
   )
-
-  catkin_add_gtest(test_${PROJECT_NAME}
-    test/test_main.cpp
-  )
-
   target_link_libraries(test_${PROJECT_NAME}
+    gtest_main
     ${PROJECT_NAME}
   )
+
+  ###################
+  ## Code_coverage ##
+  ###################
+  find_package(cmake_code_coverage QUIET)
+  if(cmake_code_coverage_FOUND)
+    add_gtest_coverage(
+      TEST_BUILD_TARGETS
+        test_${PROJECT_NAME}
+    )
+  endif()
 endif()
-
-
-###################
-## Code_coverage ##
-###################
-find_package(cmake_code_coverage QUIET)
-if(cmake_code_coverage_FOUND)
-  add_gtest_coverage(
-    TEST_BUILD_TARGETS
-      test_${PROJECT_NAME}
-  )
-endif(cmake_code_coverage_FOUND)
