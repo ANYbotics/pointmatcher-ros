@@ -12,6 +12,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>boost</depend>
   <depend>eigen_conversions</depend>
   <depend>libpointmatcher</depend>
   <depend>nav_msgs</depend>

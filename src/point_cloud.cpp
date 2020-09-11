@@ -1,14 +1,20 @@
 #define BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
 
 #include "pointmatcher_ros/point_cloud.h"
-#include "ros/ros.h"
-#include "boost/detail/endian.hpp"
-#include "boost/algorithm/string.hpp"
-//#include <boost/algorithm/string/predicate.hpp>
-//#include <boost/algorithm/string/erase.hpp>
-#include "tf/transform_listener.h"
-#include <vector>
+
+// std
 #include <memory>
+#include <vector>
+
+// boost
+#include <boost/algorithm/string.hpp>
+#include <boost/detail/endian.hpp>
+
+// ros
+#include <ros/ros.h>
+
+// tf
+#include <tf/transform_listener.h>
 
 namespace PointMatcher_ros
 {

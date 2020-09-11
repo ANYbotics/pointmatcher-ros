@@ -1,9 +1,14 @@
 #ifndef __POINTMATCHER_ROS_TRANSFORM_H
 #define __POINTMATCHER_ROS_TRANSFORM_H
 
+// eigen
+#include <Eigen/Eigen>
+
+// nav_msgs
+#include <nav_msgs/Odometry.h>
+
+// pointmatcher_ros
 #include "pointmatcher/PointMatcher.h"
-#include "nav_msgs/Odometry.h"
-#include "Eigen/Eigen"
 
 namespace ros
 {

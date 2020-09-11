@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.5.1)
 project(pointmatcher_ros)
 
 # Set compiler flags
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 # Set catkin package dependencies
@@ -17,31 +17,40 @@ set(CATKIN_PACKAGE_DEPENDENCIES
   tf_conversions
 )
 
+find_package(Boost REQUIRED)
+
 # Find catkin macros and libraries
 find_package(catkin
   REQUIRED COMPONENTS
     ${CATKIN_PACKAGE_DEPENDENCIES}
 )
 
-find_package(PCL 1.7 REQUIRED)
-add_definitions(${PCL_DEFINITIONS})
+find_package(PCL 1.7 REQUIRED
+  COMPONENTS
+    common
+    io
+)
 
 # Catkin package macro
 catkin_package(
   INCLUDE_DIRS 
     include
-    ${PCL_INCLUDE_DIRS}
+    ${PCL_COMMON_INCLUDE_DIRS}
+    ${PCL_IO_INCLUDE_DIRS}
   LIBRARIES
     ${PROJECT_NAME}
   CATKIN_DEPENDS
     ${CATKIN_PACKAGE_DEPENDENCIES}
+  DEPENDS
+    Boost
 )
 
 add_definitions(-DHAVE_YAML_CPP)
 include_directories(
   include
   SYSTEM
-    ${PCL_INCLUDE_DIRS}
+    ${PCL_COMMON_INCLUDE_DIRS}
+    ${PCL_IO_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
 
@@ -58,21 +67,23 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
   ${PCL_COMMON_LIBRARIES}
   ${PCL_IO_LIBRARIES}
+  ${catkin_LIBRARIES}
 )
 
 #############
 ## Install ##
 #############
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS
+    ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY
+    include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
@@ -95,7 +106,6 @@ if (CATKIN_ENABLE_TESTING)
       include
     PUBLIC SYSTEM
       ${catkin_INCLUDE_DIRS}
-      ${PCL_INCLUDE_DIRS}
   )
   target_link_libraries(test_${PROJECT_NAME}
     gtest_main

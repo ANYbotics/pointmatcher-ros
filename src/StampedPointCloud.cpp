@@ -1,4 +1,4 @@
-// PointMatcher_ros
+
 #include "pointmatcher_ros/StampedPointCloud.h"
 
 namespace PointMatcher_ros {
