@@ -1,6 +1,6 @@
 #define BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
 
-#include "pointmatcher_ros/point_cloud.h"
+#include "pointmatcher_ros/serialization.h"
 
 // std
 #include <memory>
@@ -11,15 +11,16 @@
 #include <boost/detail/endian.hpp>
 
 // ros
-#include <ros/ros.h>
+#include <ros/time.h>
 
 // tf
 #include <tf/transform_listener.h>
 
+// pointmatcher
+#include <pointmatcher/IO.h>
+
 namespace PointMatcher_ros
-{
-	using namespace std;
-	
+{	
 	//! Transform a ROS PointCloud2 message into a libpointmatcher point cloud
 	template<typename T>
 	typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::PointCloud2& rosMsg, const bool isDense)
@@ -45,11 +46,11 @@ namespace PointMatcher_ros
 		Labels featLabels;
 		Labels descLabels;
 		Labels timeLabels;
-		vector<bool> isFeature;
-		vector<PM_types> fieldTypes;
+		std::vector<bool> isFeature;
+		std::vector<PM_types> fieldTypes;
 		for(auto it(rosMsg.fields.begin()); it != rosMsg.fields.end(); ++it)
 		{
-			const string name(it->name);
+			const std::string name(it->name);
 			const size_t count(std::max<size_t>(it->count, 1));
 			if (name == "x" || name == "y" || name == "z")
 			{
@@ -86,10 +87,10 @@ namespace PointMatcher_ros
 			else if((it+1) != rosMsg.fields.end() && boost::algorithm::ends_with(name, "_splitTime_high32") && boost::algorithm::ends_with(((it+1)->name), "_splitTime_low32"))
 			{
 				// time extraction
-				//const string beginning = name.substr(0, name.size()-4);
-				string startingName = name;
+				//const std::string beginning = name.substr(0, name.size()-4);
+				std::string startingName = name;
 				boost::algorithm::erase_last(startingName, "_splitTime_high32");
-				const string beginning = startingName;
+				const std::string beginning = startingName;
 
 				timeLabels.push_back(Label(beginning, 1));
 				it += 1;
@@ -134,7 +135,7 @@ namespace PointMatcher_ros
 			{
 				// special case for colors
 				if (((it->datatype != PF::UINT32) && (it->datatype != PF::INT32) && (it->datatype != PF::FLOAT32)) || (it->count != 1))
-					throw runtime_error(
+					throw std::runtime_error(
 						(boost::format("Colors in a point cloud must be a single element of size 32 bits, found %1% elements of type %2%") % it->count % unsigned(it->datatype)).str()
 					);
 				View view(cloud.getDescriptorViewByName("color"));
@@ -162,7 +163,7 @@ namespace PointMatcher_ros
 			else if(boost::algorithm::ends_with(it->name, "_splitTime_high32") || 
 			        boost::algorithm::ends_with(it->name, "_splitTime_low32"))
 			{
-				string startingName = it->name;
+				std::string startingName = it->name;
 				bool isHigh = false;
 				if(boost::algorithm::ends_with(it->name, "_splitTime_high32"))
 				{
@@ -322,7 +323,7 @@ namespace PointMatcher_ros
 		
 		if(isDense == false)
 		{
-			shared_ptr<typename PM::DataPointsFilter> filter(PM::get().DataPointsFilterRegistrar.create("RemoveNaNDataPointsFilter"));
+			std::shared_ptr<typename PM::DataPointsFilter> filter(PM::get().DataPointsFilterRegistrar.create("RemoveNaNDataPointsFilter"));
 			return filter->filter(cloud);
 		}
 
@@ -545,8 +546,8 @@ namespace PointMatcher_ros
 		typedef sensor_msgs::PointField PF;
 		
 		// check type and get sizes
-		BOOST_STATIC_ASSERT(is_floating_point<T>::value);
-		BOOST_STATIC_ASSERT((is_same<T, long double>::value == false));
+		BOOST_STATIC_ASSERT(std::is_floating_point<T>::value);
+		BOOST_STATIC_ASSERT((std::is_same<T, long double>::value == false));
 		uint8_t dataType;
 		size_t scalarSize;
 		if (typeid(T) == typeid(float))

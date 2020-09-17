@@ -6,9 +6,6 @@
 // PointMatcher
 #include <pointmatcher/PointMatcher.h>
 
-// pointmatcher_ros
-#include "pointmatcher_ros/point_cloud.h"
-
 namespace PointMatcher_ros {
 
 class PointMatcherFilterInterface {

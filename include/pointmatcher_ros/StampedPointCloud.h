@@ -6,14 +6,9 @@
 // std msgs
 #include <std_msgs/Header.h>
 
-// pointmatcher
-#include <pointmatcher_ros/point_cloud.h>
-
-// pcl
-#include <pcl/io/ply_io.h>
-
-// pcl conversions
-#include <pcl_conversions/pcl_conversions.h>
+// sensor_msgs
+#include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/PointCloud2.h>
 
 // pointmatcher_ros
 #include "pointmatcher_ros/PmTf.h"
@@ -32,10 +27,12 @@ class StampedPointCloud {
  public:
   StampedPointCloud();
 
+  // TODO(ynava) Move filesystem operations to separate file.
   static StampedPointCloud FromFile(const std::string& filePath, const ros::Time& stamp, const std::string& frameId);
   bool fromFile(const std::string& filePath, const ros::Time& stamp, const std::string& frameId);
   void toFile(const std::string& filePath) const;
 
+  // TODO(ynava) Move ROS serialization functions to separate file.
   static StampedPointCloud FromRosMsg(const sensor_msgs::PointCloud2& msg);
   void fromRosMsg(const sensor_msgs::PointCloud2& msg);
   sensor_msgs::PointCloud2 toRosMsg(const ros::Time& stamp = ros::Time(0)) const;
@@ -56,6 +53,7 @@ class StampedPointCloud {
   bool transform(const PmTf& tf);
   bool transform(const PmTfParameters& transform);
 
+  // TODO(ynava) Move filtering methods to separate file.
   bool filter(PmPointCloudFilter& filter);
   bool filter(PmPointCloudFilters& filters);
   bool filterByDistance(const float distanceThreshold, const bool keepInside);

@@ -1,6 +1,15 @@
 
 #include "pointmatcher_ros/StampedPointCloud.h"
 
+// pcl
+#include <pcl/io/ply_io.h>
+
+// pcl conversions
+#include <pcl_conversions/pcl_conversions.h>
+
+// pointmatcher_ros
+#include "pointmatcher_ros/serialization.h"
+
 namespace PointMatcher_ros {
 
 StampedPointCloud::StampedPointCloud()

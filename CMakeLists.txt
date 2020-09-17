@@ -25,7 +25,7 @@ find_package(catkin
     ${CATKIN_PACKAGE_DEPENDENCIES}
 )
 
-find_package(PCL 1.7 REQUIRED
+find_package(PCL REQUIRED
   COMPONENTS
     common
     io
@@ -35,37 +35,33 @@ find_package(PCL 1.7 REQUIRED
 catkin_package(
   INCLUDE_DIRS 
     include
-    ${PCL_COMMON_INCLUDE_DIRS}
-    ${PCL_IO_INCLUDE_DIRS}
   LIBRARIES
     ${PROJECT_NAME}
   CATKIN_DEPENDS
     ${CATKIN_PACKAGE_DEPENDENCIES}
-  DEPENDS
-    Boost
 )
 
 add_definitions(-DHAVE_YAML_CPP)
-include_directories(
-  include
-  SYSTEM
-    ${PCL_COMMON_INCLUDE_DIRS}
-    ${PCL_IO_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
-)
 
 ########################
 ## Library definition ##
 ########################
 add_library(${PROJECT_NAME}
-  src/point_cloud.cpp
+  src/helper_functions.cpp
+  src/serialization.cpp
   src/transform.cpp
-  src/StampedPointCloud.cpp
   src/PmTf.cpp
   src/PointMatcherFilterInterface.cpp
-  src/helper_functions.cpp
+  src/StampedPointCloud.cpp
 )
-
+target_include_directories(${PROJECT_NAME} PRIVATE
+  include
+)
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+  ${PCL_COMMON_INCLUDE_DIRS}
+  ${PCL_IO_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
 target_link_libraries(${PROJECT_NAME}
   ${PCL_COMMON_LIBRARIES}
   ${PCL_IO_LIBRARIES}
@@ -75,14 +71,15 @@ target_link_libraries(${PROJECT_NAME}
 #############
 ## Install ##
 #############
-install(TARGETS
+install(
+  TARGETS
     ${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-install(DIRECTORY
+install(
+  DIRECTORY
     include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
@@ -93,19 +90,14 @@ install(DIRECTORY
 ## Testing ##
 #############
 if (CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED
-    COMPONENTS
-      ${CATKIN_PACKAGE_DEPENDENCIES}
-  )
-
   catkin_add_gtest(test_${PROJECT_NAME}
     test/empty_test.cpp
   )
-  target_include_directories(test_${PROJECT_NAME}
-    PRIVATE
-      include
-    PUBLIC SYSTEM
-      ${catkin_INCLUDE_DIRS}
+  target_include_directories(test_${PROJECT_NAME} PRIVATE
+    include
+  )
+  target_include_directories(test_${PROJECT_NAME} SYSTEM PUBLIC
+    ${catkin_INCLUDE_DIRS}
   )
   target_link_libraries(test_${PROJECT_NAME}
     gtest_main
