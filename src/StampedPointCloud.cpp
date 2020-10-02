@@ -91,6 +91,13 @@ StampedPointCloud StampedPointCloud::createSimilarEmpty() const {
   return similarEmtpy;
 }
 
+StampedPointCloud StampedPointCloud::createSimilarEmpty(const unsigned int count) const {
+  StampedPointCloud similarEmtpy;
+  similarEmtpy.header_ = header_;
+  similarEmtpy.dataPoints_ = dataPoints_.createSimilarEmpty(count);
+  return similarEmtpy;
+}
+
 bool StampedPointCloud::isEmpty() const { return getSize() == 0; }
 
 unsigned int StampedPointCloud::getSize() const { return dataPoints_.getNbPoints(); }

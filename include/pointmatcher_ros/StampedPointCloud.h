@@ -40,6 +40,9 @@ class StampedPointCloud {
 
   StampedPointCloud createSimilarEmpty() const;
 
+  // Create similar empty with space allocated for `count` features
+  StampedPointCloud createSimilarEmpty(unsigned int count) const;
+
   bool isEmpty() const;
   unsigned int getSize() const;
   void clear();
