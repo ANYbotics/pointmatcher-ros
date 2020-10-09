@@ -8,6 +8,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 // pointmatcher_ros
+#include "pointmatcher_ros/deserialization.h"
 #include "pointmatcher_ros/serialization.h"
 
 namespace PointMatcher_ros {

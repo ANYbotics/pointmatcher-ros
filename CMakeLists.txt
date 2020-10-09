@@ -47,6 +47,7 @@ add_definitions(-DHAVE_YAML_CPP)
 ## Library definition ##
 ########################
 add_library(${PROJECT_NAME}
+  src/deserialization.cpp
   src/helper_functions.cpp
   src/serialization.cpp
   src/transform.cpp
