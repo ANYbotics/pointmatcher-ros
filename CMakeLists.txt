@@ -5,6 +5,8 @@ project(pointmatcher_ros)
 set(CMAKE_CXX_STANDARD 14)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Set catkin package dependencies
 set(CATKIN_PACKAGE_DEPENDENCIES
   eigen_conversions
@@ -116,3 +118,23 @@ if (CATKIN_ENABLE_TESTING)
     )
   endif()
 endif()
+
+#################
+## Clang_tools ##
+#################
+find_package(cmake_clang_tools QUIET)
+if(cmake_clang_tools_FOUND)
+  add_clang_tooling(
+    TARGETS
+      ${PROJECT_NAME}
+    SOURCE_DIRS
+      ${CMAKE_CURRENT_SOURCE_DIR}/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/src
+      ${CMAKE_CURRENT_SOURCE_DIR}/test
+    CT_HEADER_FILTER 
+      ${CMAKE_CURRENT_SOURCE_DIR}/include
+    CF_CONFIG_FILE
+      ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format
+    CF_FIX
+  )
+endif(cmake_clang_tools_FOUND)

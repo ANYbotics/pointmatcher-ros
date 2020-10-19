@@ -18,7 +18,8 @@
 #include "pointmatcher_ros/PmTf.h"
 #include "pointmatcher_ros/usings.h"
 
-namespace PointMatcher_ros {
+namespace PointMatcher_ros
+{
 
 /*!
  * Creates a pointmatcher transformation from a ROS transform msg.
@@ -94,4 +95,4 @@ geometry_msgs::PoseStamped pmTfToPose(const PmTf& pmTf);
  */
 PmTf poseToPmTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId);
 
-}  // namespace PointMatcher_ros
+} // namespace PointMatcher_ros

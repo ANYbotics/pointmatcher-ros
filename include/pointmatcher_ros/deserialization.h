@@ -12,8 +12,8 @@
 
 namespace PointMatcher_ros
 {
-	template<typename T>
-	typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::PointCloud2& rosMsg, const bool isDense = false);
-} // PointMatcher_ros
+template<typename T>
+typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::PointCloud2& rosMsg, const bool isDense = false);
+} // namespace PointMatcher_ros
 
 #endif //__POINTMATCHER_ROS_DESERIALIZATION_POINT_CLOUD_H

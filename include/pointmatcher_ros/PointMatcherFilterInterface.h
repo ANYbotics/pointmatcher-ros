@@ -6,22 +6,24 @@
 // PointMatcher
 #include <pointmatcher/PointMatcher.h>
 
-namespace PointMatcher_ros {
+namespace PointMatcher_ros
+{
 
-class PointMatcherFilterInterface {
- public:
-  std::string getDataType() const { return dataType_; }
-  void setDataType(std::string newValue) { dataType_ = newValue; }
+class PointMatcherFilterInterface
+{
+public:
+    std::string getDataType() const { return dataType_; }
+    void setDataType(std::string newValue) { dataType_ = newValue; }
 
-  bool readPipelineFile(const std::string& fileName);
+    bool readPipelineFile(const std::string& fileName);
 
-  PointMatcher<float>::DataPoints process(const PointMatcher<float>::DataPoints& input);
+    PointMatcher<float>::DataPoints process(const PointMatcher<float>::DataPoints& input);
 
-  void processInPlace(PointMatcher<float>::DataPoints& input);
+    void processInPlace(PointMatcher<float>::DataPoints& input);
 
- private:
-  std::string dataType_;
-  PointMatcher<float>::DataPointsFilters filters_;
+private:
+    std::string dataType_;
+    PointMatcher<float>::DataPointsFilters filters_;
 };
 
-}  // namespace PointMatcher_ros
+} // namespace PointMatcher_ros

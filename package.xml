@@ -12,6 +12,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+<!--   <build_depend>cmake_clang_tools</build_depend> -->
+
   <depend>boost</depend>
   <depend>eigen_conversions</depend>
   <depend>libpointmatcher</depend>
