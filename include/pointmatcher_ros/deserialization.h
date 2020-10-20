@@ -10,10 +10,10 @@
 // sensor_msgs
 #include <sensor_msgs/PointCloud2.h>
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 template<typename T>
 typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs::PointCloud2& rosMsg, const bool isDense = false);
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros
 
 #endif //__POINTMATCHER_ROS_DESERIALIZATION_POINT_CLOUD_H

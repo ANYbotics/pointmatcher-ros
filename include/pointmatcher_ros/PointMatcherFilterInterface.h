@@ -6,7 +6,7 @@
 // PointMatcher
 #include <pointmatcher/PointMatcher.h>
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 class PointMatcherFilterInterface
@@ -26,4 +26,4 @@ private:
     PointMatcher<float>::DataPointsFilters filters_;
 };
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

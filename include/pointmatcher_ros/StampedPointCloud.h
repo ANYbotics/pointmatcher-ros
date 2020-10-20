@@ -14,7 +14,7 @@
 #include "pointmatcher_ros/PmTf.h"
 #include "pointmatcher_ros/usings.h"
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 class StampedPointCloud
@@ -80,4 +80,4 @@ public:
 
 std::ostream& operator<<(std::ostream& ostream, const StampedPointCloud& pointCloud);
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

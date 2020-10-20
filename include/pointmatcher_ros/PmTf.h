@@ -15,7 +15,7 @@
 // pointmatcher_ros
 #include "pointmatcher_ros/usings.h"
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 class PmTf
@@ -50,4 +50,4 @@ public:
 
 std::ostream& operator<<(std::ostream& ostream, const PmTf& tf);
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

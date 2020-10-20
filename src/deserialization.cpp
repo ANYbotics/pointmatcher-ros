@@ -12,7 +12,7 @@
 // pointmatcher
 #include <pointmatcher/IO.h>
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 //! Transform a ROS PointCloud2 message into a libpointmatcher point cloud
 template<typename T>
@@ -350,4 +350,4 @@ typename PointMatcher<T>::DataPoints rosMsgToPointMatcherCloud(const sensor_msgs
 template PointMatcher<float>::DataPoints rosMsgToPointMatcherCloud<float>(const sensor_msgs::PointCloud2& rosMsg, const bool isDense);
 template PointMatcher<double>::DataPoints rosMsgToPointMatcherCloud<double>(const sensor_msgs::PointCloud2& rosMsg, const bool isDense);
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

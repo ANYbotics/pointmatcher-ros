@@ -11,7 +11,7 @@
 #include "pointmatcher_ros/deserialization.h"
 #include "pointmatcher_ros/serialization.h"
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 StampedPointCloud::StampedPointCloud() :
@@ -44,12 +44,11 @@ bool StampedPointCloud::fromFile(const std::string& filePath, const ros::Time& s
     {
         if (std::isnan(point->curvature))
         {
-            ROS_DEBUG_STREAM("PointMatcher_ros: Removing point (" << std::distance(pointCloudPcl.begin(), point)
-                                                                  << ") with curvature == NaN.");
+            ROS_DEBUG_STREAM("Removing point (" << std::distance(pointCloudPcl.begin(), point) << ") with curvature == NaN.");
             pointCloudPcl.erase(point);
         }
     }
-    ROS_INFO_STREAM("PointMatcher_ros: Erased " << size - pointCloudPcl.size() << " invalid points from the point cloud.");
+    ROS_INFO_STREAM("Erased " << size - pointCloudPcl.size() << " invalid points from the point cloud.");
 
     sensor_msgs::PointCloud2 pointCloudRos;
     pcl::toROSMsg(pointCloudPcl, pointCloudRos);
@@ -77,7 +76,7 @@ StampedPointCloud StampedPointCloud::FromRosMsg(const sensor_msgs::PointCloud2& 
 void StampedPointCloud::fromRosMsg(const sensor_msgs::PointCloud2& msg)
 {
     header_ = msg.header;
-    dataPoints_ = PointMatcher_ros::rosMsgToPointMatcherCloud<float>(msg);
+    dataPoints_ = pointmatcher_ros::rosMsgToPointMatcherCloud<float>(msg);
 }
 
 sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time& stamp) const
@@ -96,7 +95,7 @@ sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time& stamp) con
 
 void StampedPointCloud::toRosMsg(sensor_msgs::PointCloud2& msg) const
 {
-    msg = PointMatcher_ros::pointMatcherCloudToRosMsg<float>(dataPoints_, header_.frame_id, header_.stamp);
+    msg = pointmatcher_ros::pointMatcherCloudToRosMsg<float>(dataPoints_, header_.frame_id, header_.stamp);
 }
 
 StampedPointCloud StampedPointCloud::createSimilarEmpty() const
@@ -162,7 +161,7 @@ bool StampedPointCloud::transform(const PmTf& tf)
     // Validate the transformation frames.
     if (tf.sourceFrameId_ != header_.frame_id)
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Point cloud transformation failed due to inconsistent frames. "
+        ROS_ERROR_STREAM("Point cloud transformation failed due to inconsistent frames. "
                          << "Point cloud frame: '" << header_.frame_id << "', transformation source frame: '" << tf.sourceFrameId_ << "'.");
         return false;
     }
@@ -180,7 +179,7 @@ bool StampedPointCloud::transform(const PmTfParameters& transform)
     }
     catch (const std::exception& exception)
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while transforming point cloud: " << exception.what());
+        ROS_ERROR_STREAM("Caught exception while transforming point cloud: " << exception.what());
         return false;
     }
 }
@@ -194,7 +193,7 @@ bool StampedPointCloud::filter(PmPointCloudFilter& filter)
     }
     catch (const std::exception& exception)
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while filtering point cloud: " << exception.what());
+        ROS_ERROR_STREAM("Caught exception while filtering point cloud: " << exception.what());
         return false;
     }
 }
@@ -208,7 +207,7 @@ bool StampedPointCloud::filter(PmPointCloudFilters& filters)
     }
     catch (const std::exception& exception)
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while filtering point cloud: " << exception.what());
+        ROS_ERROR_STREAM("Caught exception while filtering point cloud: " << exception.what());
         return false;
     }
 }
@@ -274,30 +273,30 @@ bool StampedPointCloud::add(const StampedPointCloud& other)
 {
     if (other.header_.frame_id != header_.frame_id)
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Point cloud concatenation failed due to inconsistent frames. "
+        ROS_ERROR_STREAM("Point cloud concatenation failed due to inconsistent frames. "
                          << "This frame: '" << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
         return false;
     }
 
     if (other.isEmpty())
     {
-        ROS_WARN_STREAM("PointMatcher_ros: Point cloud to add is empty, concatenation is not executed.");
+        ROS_WARN_STREAM("Point cloud to add is empty, concatenation is not executed.");
     }
     else if (dataPoints_.features.rows() != other.dataPoints_.features.rows())
     {
-        ROS_INFO_STREAM("PointMatcher_ros: Point clouds to concatenate have different features, overwriting them.");
+        ROS_INFO_STREAM("Point clouds to concatenate have different features, overwriting them.");
         dataPoints_ = other.dataPoints_;
     }
     else
     {
-        ROS_DEBUG_STREAM("PointMatcher_ros: Concatenating point clouds of sizes " << getSize() << " and " << other.getSize() << " ...");
+        ROS_DEBUG_STREAM("Concatenating point clouds of sizes " << getSize() << " and " << other.getSize() << " ...");
         try
         {
             dataPoints_.concatenate(other.dataPoints_);
         }
         catch (const std::exception& exception)
         {
-            ROS_ERROR_STREAM("PointMatcher_ros: Caught exception while concatenating point clouds: " << exception.what());
+            ROS_ERROR_STREAM("Caught exception while concatenating point clouds: " << exception.what());
             return false;
         }
     }
@@ -313,14 +312,14 @@ bool StampedPointCloud::addNonOverlappingPoints(const StampedPointCloud& other, 
     StampedPointCloud otherNonOverlappingPoints;
     if (!splitByOverlap(other, maxDistOverlappingPoints, otherOverlappingPoints, otherNonOverlappingPoints))
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Overlap could not be found.");
+        ROS_ERROR_STREAM("Overlap could not be found.");
         return false;
     }
 
     // Only add the non-overlapping points.
     if (!add(otherNonOverlappingPoints))
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Non-overlapping points could not be added.");
+        ROS_ERROR_STREAM("Non-overlapping points could not be added.");
         return false;
     }
 
@@ -332,7 +331,7 @@ bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const flo
 {
     if (other.header_.frame_id != header_.frame_id)
     {
-        ROS_ERROR_STREAM("PointMatcher_ros: Point cloud finding overlap failed due to inconsistent frames. "
+        ROS_ERROR_STREAM("Point cloud finding overlap failed due to inconsistent frames. "
                          << "This frame: '" << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
         return false;
     }
@@ -453,4 +452,4 @@ std::ostream& operator<<(std::ostream& ostream, const StampedPointCloud& pointCl
     return ostream;
 }
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

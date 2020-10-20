@@ -18,7 +18,7 @@
 #include "pointmatcher_ros/PmTf.h"
 #include "pointmatcher_ros/usings.h"
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 /*!
@@ -95,4 +95,4 @@ geometry_msgs::PoseStamped pmTfToPose(const PmTf& pmTf);
  */
 PmTf poseToPmTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId);
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

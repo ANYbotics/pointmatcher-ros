@@ -22,7 +22,7 @@ struct TransformListener;
 struct StampedTransform;
 } // namespace tf
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 // tf to Eigen
 template<typename T>
@@ -62,6 +62,6 @@ template<typename T>
 typename PointMatcher<T>::TransformationParameters eigenMatrixToDim(const typename PointMatcher<T>::TransformationParameters& matrix,
                                                                     int dimp1);
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros
 
 #endif //__POINTMATCHER_ROS_TRANSFORM_H

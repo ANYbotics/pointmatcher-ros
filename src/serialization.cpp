@@ -5,7 +5,7 @@
 // boost
 #include <boost/detail/endian.hpp>
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 template<typename T>
 sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,
@@ -274,4 +274,4 @@ template sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg<float>(const PointMa
 template sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg<double>(const PointMatcher<double>::DataPoints& pmCloud,
                                                                     const std::string& frame_id, const ros::Time& stamp);
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

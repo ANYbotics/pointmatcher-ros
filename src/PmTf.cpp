@@ -4,7 +4,7 @@
 // pointmatcher_ros
 #include "pointmatcher_ros/helper_functions.h"
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 PmTf::PmTf() : transformator_(std::shared_ptr<PmTransformator>(Pm::get().REG(Transformation).create("RigidTransformation")))
@@ -89,4 +89,4 @@ std::ostream& operator<<(std::ostream& ostream, const PmTf& tf)
     return ostream;
 }
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

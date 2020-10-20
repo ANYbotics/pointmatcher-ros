@@ -20,7 +20,7 @@
 #define transformEigenToTF TransformEigenToTF
 #endif // !ROS_VERSION_MINIMUM(1, 9, 30)
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 template<typename T>
 typename PointMatcher<T>::TransformationParameters transformListenerToEigenMatrix(const tf::TransformListener& listener,
@@ -178,4 +178,4 @@ template PointMatcher<float>::TransformationParameters eigenMatrixToDim<float>(c
                                                                                int dimp1);
 template PointMatcher<double>::TransformationParameters eigenMatrixToDim<double>(
     const PointMatcher<double>::TransformationParameters& matrix, int dimp1);
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

@@ -1,20 +1,20 @@
 
 #include "pointmatcher_ros/helper_functions.h"
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 PmTf tfMsgToPmTf(const geometry_msgs::TransformStamped& tfMsg)
 {
     tf::StampedTransform tf;
     tf::transformStampedMsgToTF(tfMsg, tf);
-    return PointMatcher_ros::tfToPmTf(tf);
+    return pointmatcher_ros::tfToPmTf(tf);
 }
 
 geometry_msgs::TransformStamped pmTfToTfMsg(const PmTf& pmTf)
 {
     geometry_msgs::TransformStamped tfMsg;
-    tf::transformStampedTFToMsg(PointMatcher_ros::pmTfToTf(pmTf), tfMsg);
+    tf::transformStampedTFToMsg(pointmatcher_ros::pmTfToTf(pmTf), tfMsg);
     return tfMsg;
 }
 
@@ -109,4 +109,4 @@ PmTf poseToPmTf(const geometry_msgs::PoseStamped& pose, const std::string& child
     return tfToPmTf(poseToTf(pose, childFrameId));
 }
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

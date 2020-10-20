@@ -6,7 +6,7 @@
 // pointmatcher
 #include <pointmatcher/PointMatcher.h>
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 // nabo
@@ -26,4 +26,4 @@ using PmTfParameters = Pm::TransformationParameters;
 using PmMatrix = Pm::Matrix;
 using PmMatches = Pm::Matches;
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros

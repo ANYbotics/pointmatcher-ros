@@ -5,7 +5,7 @@
 #include <exception>
 #include <fstream>
 
-namespace PointMatcher_ros
+namespace pointmatcher_ros
 {
 
 bool PointMatcherFilterInterface::readPipelineFile(const std::string& fileName)
@@ -51,4 +51,4 @@ void PointMatcherFilterInterface::processInPlace(PointMatcher<float>::DataPoints
     }
 }
 
-} // namespace PointMatcher_ros
+} // namespace pointmatcher_ros
