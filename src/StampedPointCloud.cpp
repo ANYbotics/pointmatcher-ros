@@ -8,8 +8,8 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 // pointmatcher_ros
-#include "pointmatcher_ros/deserialization.h"
 #include "pointmatcher_ros/serialization.h"
+#include "pointmatcher_ros/RosPointCloud2Deserializer.h"
 
 namespace pointmatcher_ros
 {
@@ -76,7 +76,7 @@ StampedPointCloud StampedPointCloud::FromRosMsg(const sensor_msgs::PointCloud2& 
 void StampedPointCloud::fromRosMsg(const sensor_msgs::PointCloud2& msg)
 {
     header_ = msg.header;
-    dataPoints_ = pointmatcher_ros::rosMsgToPointMatcherCloud<float>(msg);
+    dataPoints_ = RosPointCloud2Deserializer<float>::deserialize(msg);
 }
 
 sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time& stamp) const

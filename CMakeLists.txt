@@ -49,12 +49,12 @@ add_definitions(-DHAVE_YAML_CPP)
 ## Library definition ##
 ########################
 add_library(${PROJECT_NAME}
-  src/deserialization.cpp
   src/helper_functions.cpp
   src/serialization.cpp
   src/transform.cpp
   src/PmTf.cpp
   src/PointMatcherFilterInterface.cpp
+  src/RosPointCloud2Deserializer.cpp
   src/StampedPointCloud.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -94,7 +94,7 @@ install(
 #############
 if (CATKIN_ENABLE_TESTING)
   catkin_add_gtest(test_${PROJECT_NAME}
-    test/empty_test.cpp
+    test/RosPointCloud2DeserializerTest.cpp
   )
   target_include_directories(test_${PROJECT_NAME} PRIVATE
     include

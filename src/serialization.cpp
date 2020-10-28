@@ -213,7 +213,10 @@ sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T
                 memcpy(fPtr, reinterpret_cast<const uint8_t*>(&rgba), 4);
                 fPtr += 4;
                 // after color
-                memcpy(fPtr, reinterpret_cast<const uint8_t*>(&pmCloud.descriptors(postColorPos, pt)), scalarSize * postColorCount);
+                if (postColorCount > 0)
+                {
+                    memcpy(fPtr, reinterpret_cast<const uint8_t*>(&pmCloud.descriptors(postColorPos, pt)), scalarSize * postColorCount);
+                }
                 fPtr += scalarSize * postColorCount;
             }
             else
