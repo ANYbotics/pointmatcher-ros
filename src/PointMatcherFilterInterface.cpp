@@ -46,8 +46,7 @@ void PointMatcherFilterInterface::processInPlace(PointMatcher<float>::DataPoints
     }
     catch (const std::runtime_error& e)
     {
-        ROS_WARN_STREAM("Caught exception: " << e.what());
-        ROS_WARN_STREAM("Point cloud unchanged");
+        ROS_WARN_STREAM_THROTTLE(10.0, "Caught exception: " << e.what() << ".  Point cloud unchanged. (Throttled: 10s)");
     }
 }
 
