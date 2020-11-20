@@ -9,12 +9,15 @@
 namespace pointmatcher_ros
 {
 
+// central definition of numeric type.
+using NumericType = float;
+
 // nabo
-using NNS = Nabo::NearestNeighbourSearch<float>;
+using NNS = Nabo::NearestNeighbourSearch<NumericType>;
 using NNSearchType = NNS::SearchType;
 
 // pointmatcher
-using Pm = PointMatcher<float>;
+using Pm = PointMatcher<NumericType>;
 using PmDataPoints = Pm::DataPoints;
 using PmDataPointsView = PmDataPoints::View;
 using PmDataPointsConstView = PmDataPoints::ConstView;
