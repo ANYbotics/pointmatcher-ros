@@ -174,7 +174,7 @@ bool StampedPointCloud::transform(const PmTfParameters& transform)
 {
     try
     {
-        dataPoints_ = transformator_->compute(dataPoints_, transform);
+        transformator_->inPlaceCompute(transform, dataPoints_);
         return true;
     }
     catch (const std::exception& exception)
