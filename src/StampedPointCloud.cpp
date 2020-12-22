@@ -305,12 +305,12 @@ bool StampedPointCloud::add(const StampedPointCloud& other)
     return true;
 }
 
-bool StampedPointCloud::addNonOverlappingPoints(const StampedPointCloud& other, const float maxDistOverlappingPoints)
+bool StampedPointCloud::addNonOverlappingPoints(const StampedPointCloud& other, const float maxDistOverlappingPoints, PmMatches& matches)
 {
     // Split up the other point cloud in overlapping and non-overlapping points.
     StampedPointCloud otherOverlappingPoints;
     StampedPointCloud otherNonOverlappingPoints;
-    if (!splitByOverlap(other, maxDistOverlappingPoints, otherOverlappingPoints, otherNonOverlappingPoints))
+    if (!splitByOverlap(other, maxDistOverlappingPoints, matches, otherOverlappingPoints, otherNonOverlappingPoints))
     {
         ROS_ERROR_STREAM("Overlap could not be found.");
         return false;
@@ -326,7 +326,7 @@ bool StampedPointCloud::addNonOverlappingPoints(const StampedPointCloud& other, 
     return true;
 }
 
-bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const float distanceThreshold,
+bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const float distanceThreshold, PmMatches matches,
                                        StampedPointCloud& otherOverlappingPoints, StampedPointCloud& otherNonOverlappingPoints) const
 {
     if (other.header_.frame_id != header_.frame_id)
@@ -347,18 +347,22 @@ bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const flo
         otherOverlappingPoints = other.createSimilarEmpty();
         otherNonOverlappingPoints = other.createSimilarEmpty();
 
-        // Build and populate NNS.
-        PmMatches matchesOverlap(PmMatches::Dists(1, other.getSize()), PmMatches::Ids(1, other.getSize()));
-        std::shared_ptr<NNS> featureNNS(
-            NNS::create(dataPoints_.features, dataPoints_.features.rows() - 1, NNS::KDTREE_LINEAR_HEAP, NNS::TOUCH_STATISTICS));
-        featureNNS->knn(other.dataPoints_.features, matchesOverlap.ids, matchesOverlap.dists, 1, 0);
+        if (matches.dists.cols() == 0u)
+        {
+            ROS_WARN("Matches container empty. NNS will be run");
+            // Build and populate NNS.
+            matches = PmMatches(PmMatches::Dists(1, other.getSize()), PmMatches::Ids(1, other.getSize()));
+            std::shared_ptr<NNS> featureNNS(
+                NNS::create(dataPoints_.features, dataPoints_.features.rows() - 1, NNS::KDTREE_LINEAR_HEAP, NNS::TOUCH_STATISTICS));
+            featureNNS->knn(other.dataPoints_.features, matches.ids, matches.dists, 1, 0);
+        }
 
         const float distanceThresholdSquared = std::pow(distanceThreshold, 2);
         unsigned int otherOverlappingPointsSize = 0;
         unsigned int otherNonOverlappingPointsSize = 0;
         for (unsigned int i = 0; i < other.getSize(); ++i)
         {
-            if (matchesOverlap.dists(i) <= distanceThresholdSquared)
+            if (matches.dists(i) <= distanceThresholdSquared)
             {
                 // Other point is near, considered as overlapping.
                 otherOverlappingPoints.dataPoints_.setColFrom(otherOverlappingPointsSize, other.dataPoints_, i);

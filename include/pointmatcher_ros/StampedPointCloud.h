@@ -66,10 +66,10 @@ public:
                               const bool keepOverThreshold);
 
     bool add(const StampedPointCloud& other);
-    bool addNonOverlappingPoints(const StampedPointCloud& other, const float maxDistOverlappingPoints);
+    bool addNonOverlappingPoints(const StampedPointCloud& other, const float maxDistOverlappingPoints, PmMatches& matches);
 
-    bool splitByOverlap(const StampedPointCloud& other, const float distanceThreshold, StampedPointCloud& otherOverlappingPoints,
-                        StampedPointCloud& otherNonOverlappingPoints) const;
+    bool splitByOverlap(const StampedPointCloud& other, const float distanceThreshold, PmMatches matches,
+                        StampedPointCloud& otherOverlappingPoints, StampedPointCloud& otherNonOverlappingPoints) const;
     void splitByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension, const float threshold,
                              StampedPointCloud& pointsUnderThreshold, StampedPointCloud& pointsOverThreshold) const;
 
