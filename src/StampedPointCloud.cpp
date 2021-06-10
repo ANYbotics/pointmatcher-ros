@@ -300,6 +300,7 @@ bool StampedPointCloud::add(const StampedPointCloud& other)
             return false;
         }
     }
+    //TODO(ynava) Introduce flag to decide whether the stamp should be overwritten. The behavior of this function is very non-explicit at the moment.
     // Update stamp for all of the above cases.
     header_.stamp = std::max(header_.stamp, other.header_.stamp);
     return true;
