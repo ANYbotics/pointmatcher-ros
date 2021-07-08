@@ -26,6 +26,7 @@ public:
     using Label = typename DataPoints::Label;
     using Labels = typename DataPoints::Labels;
     using View = typename DataPoints::View;
+    using FieldNamesList = std::vector<std::string>;
 
     /**
      * @brief Extract the feature and descriptor labels of a given sensor_msgs/PointCloud2 message.
@@ -56,8 +57,19 @@ public:
      * @param pointCount        Number of points in the input point cloud.
      * @param view              View on the output point cloud, will be modified.
      */
-    static void fillVectorDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const std::vector<std::string>& fieldNames,
-                                       const bool is3dPointCloud, const size_t pointCount, View& view);
+    static void fillVectorDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const FieldNamesList& fieldNames, const bool is3dPointCloud,
+                                       const size_t pointCount, View& view);
+
+    /**
+     * @brief Fills data from a color descriptor into a Pointmatcher point cloud.
+     * 
+     * @param rosMsg            Input message of type sensor_msgs/PointCloud2.
+     * @param fieldName         Name of the point cloud field that corresponds to the descriptor. 
+     * @param pointCount        Number of points in the input point cloud.
+     * @param view              View on the output point cloud, will be modified.
+     */
+    static void fillColorDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const FieldNamesList& fieldNames, const size_t pointCount,
+                                      View& view);
 
     /**
      * @brief Fills a Pointmatcher point cloud with data from a sensor_msgs/PointCloud2 message.

@@ -84,7 +84,7 @@ void RosPointCloud2Deserializer<ScalarType>::fillScalarDataIntoView(const sensor
 
 template<typename ScalarType>
 void RosPointCloud2Deserializer<ScalarType>::fillVectorDataIntoView(const sensor_msgs::PointCloud2& rosMsg,
-                                                                    const std::vector<std::string>& fieldNames, const bool is3dPointCloud,
+                                                                    const FieldNamesList& fieldNames, const bool is3dPointCloud,
                                                                     const size_t pointCount, View& view)
 {
     // Create iterators to read data from the message buffer.
@@ -113,6 +113,27 @@ void RosPointCloud2Deserializer<ScalarType>::fillVectorDataIntoView(const sensor
 }
 
 template<typename ScalarType>
+void RosPointCloud2Deserializer<ScalarType>::fillColorDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const FieldNamesList& fieldNames,
+                                                                   const size_t pointCount, View& view)
+{
+    sensor_msgs::PointCloud2ConstIterator<uint8_t> iterR(rosMsg, fieldNames[0]);
+    sensor_msgs::PointCloud2ConstIterator<uint8_t> iterG(rosMsg, fieldNames[1]);
+    sensor_msgs::PointCloud2ConstIterator<uint8_t> iterB(rosMsg, fieldNames[2]);
+    sensor_msgs::PointCloud2ConstIterator<uint8_t> iterA(rosMsg, fieldNames[3]);
+    for (size_t i = 0; i < pointCount; ++i, ++iterR, ++iterG, ++iterB, ++iterA)
+    {
+        // PointCloud2Iterator implicitly casts to the type specified in its template arguments.
+        view(0, i) = static_cast<int>(*iterR) / 255.0;
+        view(1, i) = static_cast<int>(*iterG) / 255.0;
+        view(2, i) = static_cast<int>(*iterB) / 255.0;
+        if (view.rows() > 3)
+        {
+            view(3, i) = static_cast<int>(*iterA) / 255.0;
+        }
+    }
+}
+
+template<typename ScalarType>
 void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_msgs::PointCloud2& rosMsg, const bool is3dPointCloud,
                                                                   DataPoints& pointCloud)
 {
@@ -121,7 +142,7 @@ void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_m
     // Point coordinates.
     {
         View view(pointCloud.features.block(0, 0, pointCloud.features.rows(), pointCloud.features.cols()));
-        const std::vector<std::string> fieldNames{ "x", "y", "z" };
+        const FieldNamesList fieldNames{ "x", "y", "z" };
         fillVectorDataIntoView(rosMsg, fieldNames, is3dPointCloud, pointCount, view);
         pointCloud.getFeatureViewByName("pad").setOnes();
     }
@@ -130,7 +151,7 @@ void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_m
     if (pointCloud.descriptorExists("normals"))
     {
         View view(pointCloud.getDescriptorViewByName("normals"));
-        const std::vector<std::string> fieldNames{ "normal_x", "normal_y", "normal_z" };
+        const FieldNamesList fieldNames{ "normal_x", "normal_y", "normal_z" };
         fillVectorDataIntoView(rosMsg, fieldNames, is3dPointCloud, pointCount, view);
     }
 
@@ -138,26 +159,13 @@ void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_m
     if (pointCloud.descriptorExists("color"))
     {
         View view(pointCloud.getDescriptorViewByName("color"));
-        sensor_msgs::PointCloud2ConstIterator<uint8_t> iterR(rosMsg, "r");
-        sensor_msgs::PointCloud2ConstIterator<uint8_t> iterG(rosMsg, "g");
-        sensor_msgs::PointCloud2ConstIterator<uint8_t> iterB(rosMsg, "b");
-        sensor_msgs::PointCloud2ConstIterator<uint8_t> iterA(rosMsg, "a");
-        for (size_t i = 0; i < pointCount; ++i, ++iterR, ++iterG, ++iterB, ++iterA)
-        {
-            // PointCloud2Iterator implicitly casts to the type specified in its template arguments.
-            view(0, i) = static_cast<int>(*iterR) / 255.0;
-            view(1, i) = static_cast<int>(*iterG) / 255.0;
-            view(2, i) = static_cast<int>(*iterB) / 255.0;
-            if (view.rows() > 3)
-            {
-                view(3, i) = static_cast<int>(*iterA) / 255.0;
-            }
-        }
+        const FieldNamesList fieldNames{ "r", "g", "b", "a" };
+        fillColorDataIntoView(rosMsg, fieldNames, pointCount, view);
     }
 
     // Scalar descriptors.
-    const std::vector<std::string> preprocessedFieldLabels{ "xyz",   "x",   "y",    "z", "normals", "normal_x", "normal_y", "normal_z",
-                                                            "color", "rgb", "rgba", "r", "g",       "b",        "a" };
+    const FieldNamesList preprocessedFieldLabels{ "xyz",   "x",   "y",    "z", "normals", "normal_x", "normal_y", "normal_z",
+                                                  "color", "rgb", "rgba", "r", "g",       "b",        "a" };
     for (const auto& field : rosMsg.fields)
     {
         // Ignore descriptors that we have previously written into our point cloud matrix.
@@ -188,13 +196,13 @@ typename RosPointCloud2Deserializer<ScalarType>::DataPoints RosPointCloud2Deseri
     // Fill field labels.
     extractFieldLabels(rosMsg, featLabels, descLabels);
 
-    // Determine the point cloud type (2D or 3D).
-    // All points are represented in homogeneous coordinates, so dim 4 -> 3D and dim 3 -> 2D.
-    const bool is3dPointCloud = (featLabels.size() - 1) == 3 ? true : false;
-
     // Create cloud
     const size_t pointCount{ rosMsg.width * rosMsg.height };
     DataPoints pointCloud(featLabels, descLabels, pointCount);
+
+    // Determine the point cloud dimensionality (2D or 3D).
+    // All points are represented in homogeneous coordinates, so dim 4 -> 3D and dim 3 -> 2D.
+    const bool is3dPointCloud{ (featLabels.size() - 1) == 3 };
 
     // Fill cloud with data.
     fillPointCloudValues(rosMsg, is3dPointCloud, pointCloud);
