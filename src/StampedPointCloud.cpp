@@ -1,6 +1,9 @@
 
 #include "pointmatcher_ros/StampedPointCloud.h"
 
+// c++ standard library
+#include <cmath>
+
 // pcl
 #include <pcl/io/ply_io.h>
 
@@ -260,11 +263,11 @@ bool StampedPointCloud::filterByThresholding(const std::string& descriptorName, 
     splitByThresholding(descriptorName, descriptorDimension, threshold, pointsUnderThreshold, pointsOverThreshold);
     if (keepOverThreshold)
     {
-        *this = pointsOverThreshold;
+        *this = std::move(pointsOverThreshold);
     }
     else
     {
-        *this = pointsUnderThreshold;
+        *this = std::move(pointsUnderThreshold);
     }
     return true;
 }
@@ -438,14 +441,18 @@ PmMatrix StampedPointCloud::toSphericalCoordinates() const
 {
     // 0 = radius, 1 = azimuth, 2 = inclination.
     PmMatrix sphericalCoordinates = PmMatrix(3, getSize());
+
+    // r = norm(z)
     sphericalCoordinates.row(0) = dataPoints_.features.topRows(3).colwise().norm();
 
-    // Note: Eigen does not support element-wise atan2.
-    for (unsigned int i = 0; i < getSize(); i++)
-    {
-        sphericalCoordinates(1, i) = std::atan2(dataPoints_.features(1, i), dataPoints_.features(0, i)); // atan2(y,x)
-        sphericalCoordinates(2, i) = std::acos(dataPoints_.features(2, i) / sphericalCoordinates(0, i)); // acos(z/r)
-    }
+    // azimuth = atan2(y,x)
+    sphericalCoordinates.row(1) =
+        dataPoints_.features.row(1).binaryExpr(dataPoints_.features.row(0), [](float y, float x) { return std::atan2(y, x); });
+
+    // inclination = acos(z/r)
+    sphericalCoordinates.row(2) =
+        dataPoints_.features.row(2).binaryExpr(sphericalCoordinates.row(0), [](float z, float r) { return std::acos(z / r); });
+
     return sphericalCoordinates;
 }
 
