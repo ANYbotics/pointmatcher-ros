@@ -44,6 +44,8 @@ public:
         size_t dimColor_{ 0 };
         size_t dimScalar_{ 0 };
         size_t dimTime_{ 0 };
+        size_t width_{ 25 };
+        size_t height_{ 4 };
 
         bool hasNormals_{ false };
         bool hasColorRgb_{ false };
@@ -51,6 +53,7 @@ public:
         bool hasScalar_{ false };
         bool hasScalarRangeRestricted_{ false };
         bool hasIntegerTime_{ false };
+        bool isOrganized_{ false };
 
         std::string frameId_{ "sensor" };
         ros::Time stamp_;
@@ -138,6 +141,21 @@ public:
             pointCloud.addTime("time", times);
         }
 
+        if (parameters.isOrganized_)
+        {
+            pointCloud.indexGrid = PM::IndexMatrix::Constant(parameters.height_, parameters.width_, PM::DataPoints::EmptyGridValue);
+
+            // Fill all values except the last row of the point cloud.
+            for (size_t row = 0; row < parameters.height_; row++)
+            {
+                for (size_t col = 0; col < parameters.width_; col++)
+                {
+                    const PM::Matrix::Index linearIndex{ pointCloud.computeLinearIndexFromGridIndex(row, col) };
+                    pointCloud.indexGrid(row, col) = linearIndex;
+                }
+            }
+        }
+
         return pointCloud;
     }
 
@@ -170,6 +188,8 @@ TEST_F(RosPointCloud2DeserializerTest, EmptyRosMessage)
     EXPECT_EQ(deserializedPointCloud.getNbGroupedDescriptors(), 0u);
     EXPECT_EQ(deserializedPointCloud.getTimeDim(), 0u);
     EXPECT_EQ(deserializedPointCloud.getDescriptorDim(), 0u);
+    EXPECT_EQ(deserializedPointCloud.getWidth(), 0u);
+    EXPECT_EQ(deserializedPointCloud.getHeight(), 1u);
 }
 
 TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPoints)
@@ -374,6 +394,27 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsNormalsScalars)
     EXPECT_EQ(deserializedPointCloud.getDescriptorDim(), dimDescriptors);
     EXPECT_EQ(deserializedPointCloud.getTimeDim(), parameters.dimTime_);
     EXPECT_EQ(deserializedPointCloud, pointCloud);
+}
+
+TEST_F(RosPointCloud2DeserializerTest, OrganizedPointCloud3d)
+{
+    PointCloudMsgGenerationParameters parameters;
+    parameters.nbPoints_ = 100;
+    parameters.width_ = 4;
+    parameters.height_ = 25;
+    parameters.isOrganized_ = true;
+
+    // Create point cloud.
+    const DataPoints pointCloud = generatePointCloud(parameters);
+
+    // TODO(ynava) Re-implement this unit test, adding steps of point cloud serialization, deserialization, and then assertions.
+
+    // Assertions.
+    EXPECT_EQ(pointCloud.getNbPoints(), parameters.nbPoints_);
+    EXPECT_EQ(pointCloud.getEuclideanDim(), parameters.dimFeatures_ - 1);
+    EXPECT_EQ(pointCloud.getHomogeneousDim(), parameters.dimFeatures_);
+    EXPECT_EQ(pointCloud.getWidth(), parameters.width_);
+    EXPECT_EQ(pointCloud.getHeight(), parameters.height_);
 }
 
 } // namespace pointmatcher_ros

@@ -303,6 +303,13 @@ bool StampedPointCloud::add(const StampedPointCloud& other)
             return false;
         }
     }
+
+    if (dataPoints_.isOrganized())
+    {
+        // deallocate index grid, as we assume that concatenation breaks point cloud ordering
+        dataPoints_.deallocateIndexGrid();
+    }
+
     //TODO(ynava) Introduce flag to decide whether the stamp should be overwritten. The behavior of this function is very non-explicit at the moment.
     // Update stamp for all of the above cases.
     header_.stamp = std::max(header_.stamp, other.header_.stamp);
@@ -461,6 +468,7 @@ std::ostream& operator<<(std::ostream& ostream, const StampedPointCloud& pointCl
     ostream << "Frame: " << pointCloud.header_.frame_id << " ";
     ostream << "Stamp: " << pointCloud.header_.stamp.toSec() << " ";
     ostream << "Size: " << pointCloud.getSize();
+    ostream << "Is organized?: " << pointCloud.dataPoints_.isOrganized();
     return ostream;
 }
 

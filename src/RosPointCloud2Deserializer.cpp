@@ -134,6 +134,39 @@ void RosPointCloud2Deserializer<ScalarType>::fillColorDataIntoView(const sensor_
 }
 
 template<typename ScalarType>
+void RosPointCloud2Deserializer<ScalarType>::fillIndexGrid(const sensor_msgs::PointCloud2& rosMsg, const size_t pointCount,
+                                                           DataPoints& cloud)
+{
+    using ArrayBooleans = Eigen::Array<bool, 1, Eigen::Dynamic>;
+
+    // Compute the size of the index grid.
+    const Index nbColumns{ rosMsg.height };
+    const Index nbRows{ rosMsg.width };
+    assert(nbColumns * nbRows == pointCount);
+
+    // Initialize the index grid.
+    cloud.allocateIndexGrid(nbColumns, nbRows);
+
+    // Instantiate array of booleans to flag points as valid.
+    // The following line implements a fast version of isNaN(), suggested by the author of Eigen: https://forum.kde.org/viewtopic.php?f=74&t=91514
+    const ArrayBooleans isValidPoint{ (cloud.features.array() == cloud.features.array()).colwise().all() };
+
+    // Fill the index grid at each cell with a linear index value.
+    const Index maxLinearIndex{ static_cast<Index>(pointCount) };
+    for (Index linearIndex{ 0 }; linearIndex < maxLinearIndex; ++linearIndex)
+    {
+        if (!isValidPoint(linearIndex))
+        {
+            continue;
+        }
+
+        // Point the index grid cell to the current element.
+        // Note that here a strong assumption is made, about the storage order of the index grid being column-major.
+        cloud.indexGrid(linearIndex) = linearIndex;
+    }
+}
+
+template<typename ScalarType>
 void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_msgs::PointCloud2& rosMsg, const bool is3dPointCloud,
                                                                   DataPoints& pointCloud)
 {
@@ -176,6 +209,12 @@ void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_m
 
         View view{ pointCloud.getDescriptorViewByName(field.name) };
         fillScalarDataIntoView(rosMsg, field.name, pointCount, view);
+    }
+
+    // Index grid.
+    if (!rosMsg.is_dense && is3dPointCloud)
+    {
+        fillIndexGrid(rosMsg, pointCount, pointCloud);
     }
 }
 

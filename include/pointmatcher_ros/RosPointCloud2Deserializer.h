@@ -23,8 +23,11 @@ public:
     using PMIO = PointMatcherIO<ScalarType>;
     using PM_types = typename PMIO::PMPropTypes;
     using DataPoints = typename PM::DataPoints;
+    using Index = typename DataPoints::Index;
     using Label = typename DataPoints::Label;
     using Labels = typename DataPoints::Labels;
+    using IndexMatrix = typename PM::IndexMatrix;
+    using IndexGridView = typename DataPoints::IndexGridView;
     using View = typename DataPoints::View;
     using FieldNamesList = std::vector<std::string>;
 
@@ -70,6 +73,16 @@ public:
      */
     static void fillColorDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const FieldNamesList& fieldNames, const size_t pointCount,
                                       View& view);
+
+    /**
+     * @brief Fills the 'index grid' from a ROS message into a Pointmatcher point cloud.
+     * @remark This method expectes the ROS message to contain a non-dense (organized) point cloud.
+     * 
+     * @param rosMsg            Input message of type sensor_msgs/PointCloud2.
+     * @param pointCount        Number of points in the input point cloud.
+     * @param cloud             Point cloud. Its index grid will be modified
+     */
+    static void fillIndexGrid(const sensor_msgs::PointCloud2& rosMsg, const size_t pointCount, DataPoints& cloud);
 
     /**
      * @brief Fills a Pointmatcher point cloud with data from a sensor_msgs/PointCloud2 message.
