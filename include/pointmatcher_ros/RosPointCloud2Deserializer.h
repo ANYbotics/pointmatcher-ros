@@ -18,11 +18,20 @@ class RosPointCloud2Deserializer
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
     using PM = PointMatcher<ScalarType>;
+    using DataPoints = typename PM::DataPoints;
+
+    /**
+     * @brief Deserializes a sensor_msgs/PointCloud2 objects into a Pointmatcher point cloud (DataPoints)
+     * 
+     * @param rosMsg        Input message of type sensor_msgs/PointCloud2.
+     * @return DataPoints   Output point cloud.
+     */
+    static DataPoints deserialize(const sensor_msgs::PointCloud2& rosMsg);
+
+private:
     using PMIO = PointMatcherIO<ScalarType>;
     using PM_types = typename PMIO::PMPropTypes;
-    using DataPoints = typename PM::DataPoints;
     using Index = typename DataPoints::Index;
     using Label = typename DataPoints::Label;
     using Labels = typename DataPoints::Labels;
@@ -92,14 +101,6 @@ public:
      * @param pointCloud        View on the output point cloud, will be modified.
      */
     static void fillPointCloudValues(const sensor_msgs::PointCloud2& rosMsg, const bool is3dPointCloud, DataPoints& pointCloud);
-
-    /**
-     * @brief Deserializes a sensor_msgs/PointCloud2 objects into a Pointmatcher point cloud (DataPoints)
-     * 
-     * @param rosMsg        Input message of type sensor_msgs/PointCloud2.
-     * @return DataPoints   Output point cloud.
-     */
-    static DataPoints deserialize(const sensor_msgs::PointCloud2& rosMsg);
 };
 
 } // namespace pointmatcher_ros

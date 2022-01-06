@@ -8,6 +8,37 @@ namespace pointmatcher_ros
 {
 
 template<typename ScalarType>
+typename RosPointCloud2Deserializer<ScalarType>::DataPoints RosPointCloud2Deserializer<ScalarType>::deserialize(
+    const sensor_msgs::PointCloud2& rosMsg)
+{
+    // If the msg is empty return an empty point cloud.
+    if (rosMsg.fields.empty())
+    {
+        return DataPoints();
+    }
+
+    // Label containers.
+    Labels featLabels;
+    Labels descLabels;
+
+    // Fill field labels.
+    extractFieldLabels(rosMsg, featLabels, descLabels);
+
+    // Create cloud
+    const size_t pointCount{ rosMsg.width * rosMsg.height };
+    DataPoints pointCloud(featLabels, descLabels, pointCount);
+
+    // Determine the point cloud dimensionality (2D or 3D).
+    // All points are represented in homogeneous coordinates, so dim 4 -> 3D and dim 3 -> 2D.
+    const bool is3dPointCloud{ (featLabels.size() - 1) == 3 };
+
+    // Fill cloud with data.
+    fillPointCloudValues(rosMsg, is3dPointCloud, pointCloud);
+
+    return pointCloud;
+}
+
+template<typename ScalarType>
 void RosPointCloud2Deserializer<ScalarType>::extractFieldLabels(const sensor_msgs::PointCloud2& rosMsg,
                                                                 Labels& featLabels,
                                                                 Labels& descLabels)
@@ -217,38 +248,6 @@ void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_m
         fillIndexGrid(rosMsg, pointCount, pointCloud);
     }
 }
-
-template<typename ScalarType>
-typename RosPointCloud2Deserializer<ScalarType>::DataPoints RosPointCloud2Deserializer<ScalarType>::deserialize(
-    const sensor_msgs::PointCloud2& rosMsg)
-{
-    // If the msg is empty return an empty point cloud.
-    if (rosMsg.fields.empty())
-    {
-        return DataPoints();
-    }
-
-    // Label containers.
-    Labels featLabels;
-    Labels descLabels;
-
-    // Fill field labels.
-    extractFieldLabels(rosMsg, featLabels, descLabels);
-
-    // Create cloud
-    const size_t pointCount{ rosMsg.width * rosMsg.height };
-    DataPoints pointCloud(featLabels, descLabels, pointCount);
-
-    // Determine the point cloud dimensionality (2D or 3D).
-    // All points are represented in homogeneous coordinates, so dim 4 -> 3D and dim 3 -> 2D.
-    const bool is3dPointCloud{ (featLabels.size() - 1) == 3 };
-
-    // Fill cloud with data.
-    fillPointCloudValues(rosMsg, is3dPointCloud, pointCloud);
-
-    return pointCloud;
-}
-
 
 // Explicit template instantiations for floating point types.
 template class RosPointCloud2Deserializer<float>;
