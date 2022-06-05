@@ -12,8 +12,7 @@ namespace pointmatcher_ros
  */
 enum class ColorKey
 {
-    kBlack = 0,
-    kWhite,
+    kWhite = 0,
     kRed,
     kGreen,
     kBlue,
@@ -22,7 +21,8 @@ enum class ColorKey
     kGold,
     kGrey,
     kLavender,
-    kOrange
+    kOrange,
+    kBlack
 };
 
 /**
@@ -38,8 +38,7 @@ struct RgbaColorMap
 
     Values operator[](const ColorKey key) const { return rgbColorValues_.at(key); }
 
-    const std::unordered_map<ColorKey, Values> rgbColorValues_ = { { ColorKey::kBlack, { 0, 0, 0, 1 } },
-                                                                   { ColorKey::kWhite, { 1, 1, 1, 1 } },
+    const std::unordered_map<ColorKey, Values> rgbColorValues_ = { { ColorKey::kWhite, { 1, 1, 1, 1 } },
                                                                    { ColorKey::kRed, { 1, 0, 0, 1 } },
                                                                    { ColorKey::kGreen, { 0, 1, 0, 1 } },
                                                                    { ColorKey::kBlue, { 0, 0, 1, 1 } },
@@ -48,8 +47,9 @@ struct RgbaColorMap
                                                                    { ColorKey::kGold, { 0.898, 0.784, 0.462, 1 } },
                                                                    { ColorKey::kGrey, { 0.705, 0.674, 0.678, 1 } },
                                                                    { ColorKey::kLavender, { 0.560, 0.501, 0.674, 1 } },
-                                                                   { ColorKey::kOrange, { 1, 0.501, 0, 1 } } };
-};
+                                                                   { ColorKey::kOrange, { 1, 0.501, 0, 1 } },
+                                                                   { ColorKey::kBlack, { 0, 0, 0, 1 } } };
+}; // namespace pointmatcher_ros
 
 
 } // namespace pointmatcher_ros

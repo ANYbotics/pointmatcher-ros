@@ -17,6 +17,7 @@ set(CATKIN_PACKAGE_DEPENDENCIES
   sensor_msgs
   tf
   tf_conversions
+  visualization_msgs
 )
 
 find_package(Boost REQUIRED)
@@ -54,6 +55,7 @@ add_library(${PROJECT_NAME}
   src/transform.cpp
   src/PmTf.cpp
   src/PointMatcherFilterInterface.cpp
+  src/StampedPointCloudPublisher.cpp
   src/RosPointCloud2Deserializer.cpp
   src/StampedPointCloud.cpp
 )
