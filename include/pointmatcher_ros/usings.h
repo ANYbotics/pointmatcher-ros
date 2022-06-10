@@ -28,5 +28,6 @@ using PmTransformator = Pm::Transformation;
 using PmTfParameters = Pm::TransformationParameters;
 using PmMatrix = Pm::Matrix;
 using PmMatches = Pm::Matches;
+using PmOutlierWeights = Pm::OutlierWeights;
 
 } // namespace pointmatcher_ros
