@@ -82,7 +82,7 @@ void StampedPointCloud::fromRosMsg(const sensor_msgs::PointCloud2& msg)
     dataPoints_ = RosPointCloud2Deserializer<float>::deserialize(msg);
 }
 
-sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time& stamp) const
+sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time stamp) const
 {
     sensor_msgs::PointCloud2 msg;
     toRosMsg(msg);
@@ -465,10 +465,10 @@ PmMatrix StampedPointCloud::toSphericalCoordinates() const
 
 std::ostream& operator<<(std::ostream& ostream, const StampedPointCloud& pointCloud)
 {
-    ostream << "Frame: " << pointCloud.header_.frame_id << " ";
-    ostream << "Stamp: " << pointCloud.header_.stamp.toSec() << " ";
-    ostream << "Size: " << pointCloud.getSize();
-    ostream << "Is organized?: " << pointCloud.dataPoints_.isOrganized();
+    ostream << "Frame: " << pointCloud.header_.frame_id << "\n";
+    ostream << "Stamp: " << pointCloud.header_.stamp.toSec() << "\n";
+    ostream << "Size: " << pointCloud.getSize() << "\n";
+    ostream << "Is organized?: " << pointCloud.dataPoints_.isOrganized() << "\n";
     return ostream;
 }
 

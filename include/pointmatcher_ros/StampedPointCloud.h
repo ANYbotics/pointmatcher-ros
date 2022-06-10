@@ -37,7 +37,7 @@ public:
     // TODO(ynava) Move ROS serialization functions to separate file.
     static StampedPointCloud FromRosMsg(const sensor_msgs::PointCloud2& msg);
     void fromRosMsg(const sensor_msgs::PointCloud2& msg);
-    sensor_msgs::PointCloud2 toRosMsg(const ros::Time& stamp = ros::Time(0)) const;
+    sensor_msgs::PointCloud2 toRosMsg(const ros::Time stamp = ros::Time(0)) const;
     void toRosMsg(sensor_msgs::PointCloud2& msg) const;
 
     StampedPointCloud createSimilarEmpty() const;
