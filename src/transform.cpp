@@ -13,6 +13,8 @@
 #include <tf/transform_listener.h>
 #include <tf_conversions/tf_eigen.h>
 
+#include "pointmatcher_ros/PmTf.h"
+
 
 // ugly test depending on roscpp because tf_conversions is not properly versionized
 #if !ROS_VERSION_MINIMUM(1, 9, 30)
@@ -173,6 +175,62 @@ typename PointMatcher<T>::TransformationParameters eigenMatrixToDim(const typena
     out.topRightCorner(2, 1) = matrix.topRightCorner(2, 1);
     return out;
 }
+
+bool transformCloudToFrame(const std::string& fixedFrame, const std::string& targetFrame, const ros::Time& targetStamp,
+                           const tf2_ros::Buffer& tfBuffer, StampedPointCloud& pointCloud, const double waitTimeTfLookup)
+{
+    const auto& sourceFrame{ pointCloud.header_.frame_id };
+    const auto& sourceStamp{ pointCloud.header_.stamp };
+
+    if (sourceFrame.empty())
+    {
+        ROS_WARN("Point cloud could not be transformed to target frame due to missing source frame.");
+        return false;
+    }
+    if (targetFrame.empty())
+    {
+        ROS_WARN("Point cloud could not be transformed to target frame due to missing target frame.");
+        return false;
+    }
+    if (pointCloud.isEmpty())
+    {
+        ROS_WARN("Point cloud could not be transformed to target frame as it contains no data.");
+        return false;
+    }
+
+    if (sourceFrame == targetFrame && sourceStamp == targetStamp)
+    {
+        ROS_DEBUG("Early return when transforming point cloud as it is already in the target frame at the expected time.");
+        return true;
+    }
+
+    if (!tfBuffer.canTransform(targetFrame, targetStamp, sourceFrame, sourceStamp, fixedFrame, ros::Duration(waitTimeTfLookup)))
+    {
+        ROS_WARN_STREAM("Requested transform from frames \'" + sourceFrame + "' to '" + targetFrame + "', with target timestamp "
+                        << targetStamp << " cannot be found.");
+        return false;
+    }
+
+    geometry_msgs::TransformStamped tfSourceToTargetRos;
+    try
+    {
+        // Lookup tf from source frame to target frame, using an intermediate fixed frame
+        tfSourceToTargetRos =
+            tfBuffer.lookupTransform(targetFrame, targetStamp, sourceFrame, sourceStamp, fixedFrame, ros::Duration(waitTimeTfLookup));
+    }
+    catch (const tf2::TransformException& exception)
+    {
+        ROS_DEBUG_STREAM("Caught an exception while looking up transformation: " << exception.what());
+        return false;
+    }
+
+    // Transform point cloud from source frame to target frame.
+    PmTf tfSourceToTarget = PmTf::FromRosTfMsg(tfSourceToTargetRos);
+    pointCloud.transform(tfSourceToTarget);
+
+    return true;
+}
+
 
 template PointMatcher<float>::TransformationParameters eigenMatrixToDim<float>(const PointMatcher<float>::TransformationParameters& matrix,
                                                                                int dimp1);

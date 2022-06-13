@@ -7,8 +7,14 @@
 // nav_msgs
 #include <nav_msgs/Odometry.h>
 
+// tf2_ros
+#include <tf2_ros/transform_listener.h>
+
+// pointmatcher
+#include <pointmatcher/PointMatcher.h>
+
 // pointmatcher_ros
-#include "pointmatcher/PointMatcher.h"
+#include "pointmatcher_ros/StampedPointCloud.h"
 
 namespace ros
 {
@@ -61,6 +67,19 @@ tf::StampedTransform eigenMatrixToStampedTransform(const typename PointMatcher<T
 template<typename T>
 typename PointMatcher<T>::TransformationParameters eigenMatrixToDim(const typename PointMatcher<T>::TransformationParameters& matrix,
                                                                     int dimp1);
+
+/**
+ * @brief Transforms a point cloud to a target frame, using a fixed frame as reference.
+ *
+ * @param fixedFrame[in]  Fixed frame, to be used as reference for the motion between the point cloud and the target timestamp.
+ * @param targetFrame[in] Target frame.
+ * @param targetStamp[in] Target timestamp.
+ * @param pointCloud[in/out]  Point cloud to transform.
+ * @return true       If successul, false otherwise.
+ */
+bool transformCloudToFrame(const std::string& fixedFrame, const std::string& targetFrame, const ros::Time& targetStamp,
+                           const tf2_ros::Buffer& tfBuffer, StampedPointCloud& pointCloud, double waitTimeTfLookup = 0.1);
+
 
 } // namespace pointmatcher_ros
 
