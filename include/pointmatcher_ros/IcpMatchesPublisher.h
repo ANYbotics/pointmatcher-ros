@@ -17,10 +17,13 @@ namespace pointmatcher_ros
  * @brief Parameters for the Point Cloud Publisher objects.
  * 
  */
-struct StampedPointCloudPublisherParameters
+struct IcpMatchesPublisherParameters
 {
-    //! Point cloud publisher topic name.
-    std::string pointCloudPublisherTopic_{ "/point_cloud" };
+    //! Reading point cloud publisher topic name.
+    std::string readingPointCloudPublisherTopic_{ "/reading_point_cloud" };
+
+    //! Rereference point cloud publisher topic name.
+    std::string referencePointCloudPublisherTopic_{ "/reference_point_cloud" };
 
     //! Queue size for this publisher.
     int queueSizeOfPublishers_{ 0 };
@@ -31,8 +34,11 @@ struct StampedPointCloudPublisherParameters
     //! Whether surface normals should be published.
     bool publishSurfaceNormals_{ false };
 
-    //! Color for displaying point cloud markers.
-    ColorKey markersColor_{ ColorKey::kYellow };
+    //! Color for displaying reading point cloud markers.
+    ColorKey readingMarkersColor_{ ColorKey::kYellow };
+
+    //! Color for displaying reference point cloud markers.
+    ColorKey referenceMarkersColor_{ ColorKey::kBlue };
 
     NormalVectorsMarkerGenerationParameters normals_;
 };
@@ -41,16 +47,16 @@ struct StampedPointCloudPublisherParameters
  * @brief Stamped Point Cloud Publisher.
  * A point cloud publisher that publishes a point cloud and additional information from its descriptors (e.g. normal vectors, bounding box, etc)
  */
-class StampedPointCloudPublisher
+class IcpMatchesPublisher
 {
 public:
-    using Parameters = StampedPointCloudPublisherParameters;
+    using Parameters = IcpMatchesPublisherParameters;
 
     /**
      * @brief Construct a new Stamped Point Cloud Publisher object.
      * 
      */
-    StampedPointCloudPublisher();
+    IcpMatchesPublisher();
 
     /**
      * @brief Advertises publishers with their configuration fetched from the ROS Parameter Server.
@@ -67,18 +73,6 @@ public:
     void advertiseFromRosParameters(ros::NodeHandle nodeHandle, const std::string& parametersKey);
 
     /**
-     * @brief Advertises publishers with their configuration provided directly as function argument.
-     * 
-     * @param nodeHandle      ROS node handle.
-     * @param topicName       Topic name.
-     * @param queueSize       Queue size.
-     * @param latch           Whether the publisher should be latched.
-     * @param publishNormals  Whether surface normal topics should be published (if available)
-     */
-    void advertiseFromTopicName(ros::NodeHandle nodeHandle, const std::string& topicName, int queueSize = 1, bool latch = false,
-                                bool publishNormals = false, ColorKey color = ColorKey::kWhite);
-
-    /**
      * @brief Whether the publisher is latched.
      * 
      * @return true   If latched, false otherwise.
@@ -93,12 +87,21 @@ public:
     size_t getNumSubscribers() const;
 
     /**
+     * @brief Process matches from the libpointmatcher's ICP algorithm, which can be published for visualization later on.
+     * 
+     * @param readingPointCloud     Reading point cloud used for registration.
+     * @param referencePointCloud   Reference point cloud used for registration.
+     * @param matches               Point matches computed by registration.
+     * @param outlierWeights        Outlier weights computed by registration.
+     */
+    void processMatches(const StampedPointCloud& readingPointCloud, const StampedPointCloud& referencePointCloud,
+                        const PmMatches& icpMatches, const PmOutlierWeights& icpOutlierWeights);
+
+    /**
      * @brief Publish all the topics for a given point cloud.
      * 
-     * @param pointCloud    The point cloud to publish.
-     * @param targetStamp   Timestamp for publishing the data. If targetStamp == ros::Time(0), the original timestamp is used.
      */
-    void publish(const StampedPointCloud& pointCloud, const ros::Time targetStamp = ros::Time(0)) const;
+    void publish() const;
 
 private:
     /**
@@ -109,20 +112,16 @@ private:
     void setUpPublishers(ros::NodeHandle nodeHandle);
 
     /**
-     * @brief Publishes a point cloud.
+     * @brief Publishes the matched points point clouds.
      * 
-     * @param pointCloud  The point cloud to publish.
-     * @param timestamp   Timestamp to publish the point cloud.
      */
-    void publishPointCloud(const StampedPointCloud& pointCloud, const ros::Time& timestamp) const;
+    void publishPointClouds() const;
 
     /**
-     * @brief Publishes the surface normals of a point cloud.
+     * @brief Publishes the surface normals of the matched points.
      * 
-     * @param pointCloud  The point cloud that provides the surface normals.
-     * @param timestamp   Timestamp to publish the point cloud.
      */
-    void publishSurfaceNormals(const StampedPointCloud& pointCloud, const ros::Time& timestamp) const;
+    void publishSurfaceNormals() const;
 
     //! Publisher parameters.
     Parameters parameters_;
@@ -131,8 +130,15 @@ private:
     RgbaColorMap colorMap_;
 
     //! ROS publishers.
-    std::optional<ros::Publisher> pointCloudPublisher_;
-    std::optional<ros::Publisher> normalsMarkersPublisher_;
+    std::optional<ros::Publisher> readingPointsMatchedPointCloudPublisher_;
+    std::optional<ros::Publisher> readingPointsMatchedNormalMarkersPublisher_;
+    std::optional<ros::Publisher> referencePointsMatchedPointCloudPublisher_;
+    std::optional<ros::Publisher> referencePointsMatchedNormalMarkersPublisher_;
+
+    //! Reading points that were matched against the map.
+    StampedPointCloud readingPointsMatchedPointCloud_;
+    //! Reference/map points that were matched
+    StampedPointCloud referencePointsMatchedPointCloud_;
 };
 
 } // namespace pointmatcher_ros

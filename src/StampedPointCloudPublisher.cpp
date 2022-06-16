@@ -41,7 +41,7 @@ void StampedPointCloudPublisher::advertiseFromTopicName(ros::NodeHandle nodeHand
 
 bool StampedPointCloudPublisher::isLatched() const
 {
-    if (normalsMarkersPublisher_ == std::nullopt)
+    if (!parameters_.publishSurfaceNormals_)
     {
         return pointCloudPublisher_->isLatched();
     }
@@ -51,7 +51,7 @@ bool StampedPointCloudPublisher::isLatched() const
 
 size_t StampedPointCloudPublisher::getNumSubscribers() const
 {
-    if (normalsMarkersPublisher_ == std::nullopt)
+    if (!parameters_.publishSurfaceNormals_)
     {
         return pointCloudPublisher_->getNumSubscribers();
     }
@@ -77,7 +77,7 @@ void StampedPointCloudPublisher::publish(const StampedPointCloud& pointCloud, co
 
     publishPointCloud(pointCloud, timestamp);
 
-    if (normalsMarkersPublisher_ != std::nullopt)
+    if (parameters_.publishSurfaceNormals_)
     {
         publishSurfaceNormals(pointCloud, timestamp);
     }
@@ -110,63 +110,16 @@ void StampedPointCloudPublisher::publishPointCloud(const StampedPointCloud& poin
 
 void StampedPointCloudPublisher::publishSurfaceNormals(const StampedPointCloud& pointCloud, const ros::Time& timestamp) const
 {
-    if (normalsMarkersPublisher_->getNumSubscribers() == 0u && !normalsMarkersPublisher_->isLatched())
+    if (normalsMarkersPublisher_->getNumSubscribers() > 0u || normalsMarkersPublisher_->isLatched())
     {
-        return;
+        auto normalMarkers{ generateMarkersForSurfaceNormalVectors(
+            pointCloud, timestamp, parameters_.normals_, colorMap_[parameters_.markersColor_]) };
+        if (normalMarkers != std::nullopt)
+        {
+            ROS_DEBUG("Publishing point cloud surface normals for publisher '%s'.", parameters_.pointCloudPublisherTopic_.c_str());
+            normalsMarkersPublisher_->publish(normalMarkers.value());
+        }
     }
-    if (pointCloud.isEmpty())
-    {
-        return;
-    }
-
-    if (!pointCloud.dataPoints_.descriptorExists(parameters_.normals_.pointCloudFieldId_))
-    {
-        ROS_WARN("Point cloud has no normals descriptor. Publisher configuration or normal computation might be inconsistent.");
-        return;
-    }
-
-    ROS_DEBUG("Publishing point cloud surface normals for publisher '%s'.", parameters_.pointCloudPublisherTopic_.c_str());
-
-    /* Common values used for all visualizations */
-    const std::size_t numberOfPoints{ pointCloud.getSize() };
-    const RgbaColorMap::Values colorValues{ colorMap_[parameters_.markersColor_] };
-    std_msgs::ColorRGBA color;
-    color.r = colorValues[0];
-    color.g = colorValues[1];
-    color.b = colorValues[2];
-    color.a = colorValues[3];
-
-    /* Vectors */
-    visualization_msgs::Marker vectorsMarker;
-    vectorsMarker.header.stamp = timestamp;
-    vectorsMarker.header.frame_id = pointCloud.header_.frame_id;
-    vectorsMarker.ns = parameters_.normals_.vectorsMarkerNamespace_;
-    vectorsMarker.action = visualization_msgs::Marker::ADD;
-    vectorsMarker.type = visualization_msgs::Marker::LINE_LIST;
-    vectorsMarker.pose.orientation.w = 1.0;
-    vectorsMarker.id = parameters_.normals_.vectorsMarkerId_;
-    vectorsMarker.scale.x = parameters_.normals_.vectorsWidth_;
-    vectorsMarker.color = color;
-    vectorsMarker.points.resize(numberOfPoints * 2);
-
-    const auto& surfaceNormalsView{ pointCloud.dataPoints_.getDescriptorViewByName(parameters_.normals_.pointCloudFieldId_) };
-    for (size_t i = 0; i < numberOfPoints; i += 2)
-    {
-        // The actual position of the point that the surface normal belongs to.
-        vectorsMarker.points[i].x = pointCloud.dataPoints_.features(0, i);
-        vectorsMarker.points[i].y = pointCloud.dataPoints_.features(1, i);
-        vectorsMarker.points[i].z = pointCloud.dataPoints_.features(2, i);
-
-        // End if arrow.
-        vectorsMarker.points[i + 1].x =
-            pointCloud.dataPoints_.features(0, i) + surfaceNormalsView(0, i) * parameters_.normals_.vectorsScalingFactor_;
-        vectorsMarker.points[i + 1].y =
-            pointCloud.dataPoints_.features(1, i) + surfaceNormalsView(1, i) * parameters_.normals_.vectorsScalingFactor_;
-        vectorsMarker.points[i + 1].z =
-            pointCloud.dataPoints_.features(2, i) + surfaceNormalsView(2, i) * parameters_.normals_.vectorsScalingFactor_;
-    }
-
-    normalsMarkersPublisher_->publish(vectorsMarker);
 }
 
 

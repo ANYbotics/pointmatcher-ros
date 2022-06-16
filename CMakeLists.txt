@@ -53,11 +53,13 @@ add_library(${PROJECT_NAME}
   src/helper_functions.cpp
   src/serialization.cpp
   src/transform.cpp
+  src/IcpMatchesPublisher.cpp
   src/PmTf.cpp
   src/PointMatcherFilterInterface.cpp
   src/StampedPointCloudPublisher.cpp
   src/RosPointCloud2Deserializer.cpp
   src/StampedPointCloud.cpp
+  src/visualization_utils.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE
   include
