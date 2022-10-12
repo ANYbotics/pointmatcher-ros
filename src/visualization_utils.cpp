@@ -23,7 +23,7 @@ std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors
     }
 
     /* Common values used for all visualizations */
-    const std::size_t numberOfPoints{ pointCloud.getSize() };
+    const PmDataPoints::Index numberOfPoints{ pointCloud.getSize() };
     std_msgs::ColorRGBA colorMsg;
     colorMsg.r = color[0];
     colorMsg.g = color[1];
@@ -44,17 +44,26 @@ std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors
     vectorsMarker.points.resize(numberOfPoints * 2);
 
     const auto& surfaceNormalsView{ pointCloud.dataPoints_.getDescriptorViewByName(parameters.pointCloudFieldId_) };
-    for (size_t i = 0; i < numberOfPoints; i += 2)
+    PmDataPoints::Index markerIndex{ 0 };
+    for (PmDataPoints::Index pointIndex = 0; pointIndex < numberOfPoints; ++pointIndex)
     {
-        // The actual position of the point that the surface normal belongs to.
-        vectorsMarker.points[i].x = pointCloud.dataPoints_.features(0, i);
-        vectorsMarker.points[i].y = pointCloud.dataPoints_.features(1, i);
-        vectorsMarker.points[i].z = pointCloud.dataPoints_.features(2, i);
+        // This loop leverages two indices:
+        // - A point index, that goes through every point in the point cloud. It increments 1 step at a time.
+        // - A marker index. As every normal line marker needs a start and end point, it increments 2 steps at a time.
 
-        // End if arrow.
-        vectorsMarker.points[i + 1].x = pointCloud.dataPoints_.features(0, i) + surfaceNormalsView(0, i) * parameters.vectorsScalingFactor_;
-        vectorsMarker.points[i + 1].y = pointCloud.dataPoints_.features(1, i) + surfaceNormalsView(1, i) * parameters.vectorsScalingFactor_;
-        vectorsMarker.points[i + 1].z = pointCloud.dataPoints_.features(2, i) + surfaceNormalsView(2, i) * parameters.vectorsScalingFactor_;
+        // The actual position of the point that the surface normal belongs to.
+        vectorsMarker.points[markerIndex].x = pointCloud.dataPoints_.features(0, pointIndex);
+        vectorsMarker.points[markerIndex].y = pointCloud.dataPoints_.features(1, pointIndex);
+        vectorsMarker.points[markerIndex].z = pointCloud.dataPoints_.features(2, pointIndex);
+
+        // End of arrow.
+        vectorsMarker.points[markerIndex + 1].x =
+            pointCloud.dataPoints_.features(0, pointIndex) + surfaceNormalsView(0, pointIndex) * parameters.vectorsScalingFactor_;
+        vectorsMarker.points[markerIndex + 1].y =
+            pointCloud.dataPoints_.features(1, pointIndex) + surfaceNormalsView(1, pointIndex) * parameters.vectorsScalingFactor_;
+        vectorsMarker.points[markerIndex + 1].z =
+            pointCloud.dataPoints_.features(2, pointIndex) + surfaceNormalsView(2, pointIndex) * parameters.vectorsScalingFactor_;
+        markerIndex += 2;
     }
 
     return vectorsMarker;
