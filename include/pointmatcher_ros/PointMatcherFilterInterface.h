@@ -17,6 +17,13 @@ public:
 
     bool readPipelineFile(const std::string& fileName);
 
+    /**
+     * @brief Read the filters configuration from yaml node.
+     * @param yamlNode The yaml node which contains the filters configuration.
+     * @return True if the filters are configured properly. False otherwise.
+     */
+    bool readFiltersFromYamlNode(const YAML::Node& yamlNode);
+
     PointMatcher<float>::DataPoints process(const PointMatcher<float>::DataPoints& input);
 
     void processInPlace(PointMatcher<float>::DataPoints& input);

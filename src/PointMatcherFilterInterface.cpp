@@ -21,6 +21,18 @@ bool PointMatcherFilterInterface::readPipelineFile(const std::string& fileName)
     return true;
 }
 
+bool PointMatcherFilterInterface::readFiltersFromYamlNode(const YAML::Node& yamlNode)
+{
+    if (!yamlNode)
+    {
+        ROS_ERROR_STREAM("Couldn't read filters configuration.");
+        return false;
+    }
+    filters_ = PointMatcher<float>::DataPointsFilters(yamlNode);
+    return true;
+}
+
+
 PointMatcher<float>::DataPoints PointMatcherFilterInterface::process(const PointMatcher<float>::DataPoints& input)
 {
     // Copy input point cloud.
