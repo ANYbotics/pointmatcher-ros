@@ -6,6 +6,9 @@
 // PointMatcher
 #include <pointmatcher/PointMatcher.h>
 
+// PointMatcher ros
+#include "pointmatcher_ros/usings.h"
+
 namespace pointmatcher_ros
 {
 
@@ -24,13 +27,13 @@ public:
      */
     bool readFiltersFromYamlNode(const YAML::Node& yamlNode);
 
-    PointMatcher<float>::DataPoints process(const PointMatcher<float>::DataPoints& input);
+    Pm::DataPoints process(const Pm::DataPoints& input);
 
-    void processInPlace(PointMatcher<float>::DataPoints& input);
+    void processInPlace(Pm::DataPoints& input);
 
 private:
     std::string dataType_;
-    PointMatcher<float>::DataPointsFilters filters_;
+    Pm::DataPointsFilters filters_;
 };
 
 } // namespace pointmatcher_ros

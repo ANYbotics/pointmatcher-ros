@@ -17,7 +17,7 @@ bool PointMatcherFilterInterface::readPipelineFile(const std::string& fileName)
         return false;
     }
 
-    filters_ = PointMatcher<float>::DataPointsFilters(inFile);
+    filters_ = Pm::DataPointsFilters(inFile);
     return true;
 }
 
@@ -28,12 +28,12 @@ bool PointMatcherFilterInterface::readFiltersFromYamlNode(const YAML::Node& yaml
         ROS_ERROR_STREAM("Couldn't read filters configuration.");
         return false;
     }
-    filters_ = PointMatcher<float>::DataPointsFilters(yamlNode);
+    filters_ = Pm::DataPointsFilters(yamlNode);
     return true;
 }
 
 
-PointMatcher<float>::DataPoints PointMatcherFilterInterface::process(const PointMatcher<float>::DataPoints& input)
+Pm::DataPoints PointMatcherFilterInterface::process(const Pm::DataPoints& input)
 {
     // Copy input point cloud.
     auto localInput = input;
@@ -44,7 +44,7 @@ PointMatcher<float>::DataPoints PointMatcherFilterInterface::process(const Point
     return localInput;
 }
 
-void PointMatcherFilterInterface::processInPlace(PointMatcher<float>::DataPoints& input)
+void PointMatcherFilterInterface::processInPlace(Pm::DataPoints& input)
 {
     if (input.getNbPoints() == 0u)
     {
