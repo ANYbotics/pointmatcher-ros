@@ -6,6 +6,7 @@
 #include <ros/time.h>
 
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 #include "pointmatcher_ros/Colors.h"
 #include "pointmatcher_ros/StampedPointCloud.h"
@@ -48,5 +49,20 @@ std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors
                                                                                  const ros::Time& timestamp,
                                                                                  const NormalVectorsMarkerGenerationParameters& parameters,
                                                                                  const RgbaColorMap::Values& color);
+
+/**
+ * @brief Generates tile markers for a given set of surface normals vectors.
+ * 
+ * @param pointCloud    Point cloud to generate markers from. It is expected to contain 3D points and 3D normals.
+ * @param timestamp     Timestamp to embed the markers message with.
+ * @param parameters    Marker generation parameters.
+ * @param color         RGB color for markers.
+ * @return std::optional<visualization_msgs::Marker>    (Optional) marker representing surface normal vectors as tiles
+ */
+std::optional<visualization_msgs::MarkerArray> generateMarkersForSurfaceNormalPatches(
+    const StampedPointCloud& pointCloud,
+    const ros::Time& timestamp,
+    const NormalVectorsMarkerGenerationParameters& parameters,
+    const RgbaColorMap::Values& color);
 
 } // namespace pointmatcher_ros
