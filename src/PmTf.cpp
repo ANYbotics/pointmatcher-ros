@@ -82,10 +82,10 @@ void PmTf::fixRotationScaling()
 
 std::ostream& operator<<(std::ostream& ostream, const PmTf& tf)
 {
-    ostream << "Stamp: " << tf.stamp_ << " ";
-    ostream << "Source frame: " << tf.sourceFrameId_ << " ";
-    ostream << "Target frame: " << tf.targetFrameId_ << std::endl;
-    ostream << "Parameters: " << tf.parameters_ << std::endl;
+    ostream << "Stamp: " << tf.stamp_ << "\n";
+    ostream << "Source frame: " << tf.sourceFrameId_ << "\n";
+    ostream << "Target frame: " << tf.targetFrameId_ << "\n";
+    ostream << "Parameters:\n" << tf.parameters_ << "\n";
     return ostream;
 }
 
