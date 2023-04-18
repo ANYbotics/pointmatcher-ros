@@ -165,6 +165,33 @@ void RosPointCloud2Deserializer<ScalarType>::fillColorDataIntoView(const sensor_
 }
 
 template<typename ScalarType>
+void RosPointCloud2Deserializer<ScalarType>::fillPerPointRingDataIntoView(const sensor_msgs::PointCloud2& rosMsg,
+                                                                          const std::string& fieldName, const size_t pointCount, View& view)
+{
+    // Use iterator to read data and write it into view.
+    sensor_msgs::PointCloud2ConstIterator<uint16_t> iter(rosMsg, fieldName);
+    for (size_t i = 0; i < pointCount; ++i, ++iter)
+    {
+        view(0, i) = static_cast<int>((*iter));
+    }
+}
+
+template<typename ScalarType>
+void RosPointCloud2Deserializer<ScalarType>::fillPerPointAbsoluteTimestampDataIntoView(const sensor_msgs::PointCloud2& rosMsg,
+                                                                                       const std::string& fieldName,
+                                                                                       const size_t pointCount, View& view)
+{
+    // Use iterator to read data and write it into view.
+    sensor_msgs::PointCloud2ConstIterator<double> iter(rosMsg, fieldName);
+    const double scanTimestamp{ rosMsg.header.stamp.toSec() };
+    for (size_t i = 0; i < pointCount; ++i, ++iter)
+    {
+        view(0, i) = static_cast<ScalarType>((*iter) - scanTimestamp);
+    }
+}
+
+
+template<typename ScalarType>
 void RosPointCloud2Deserializer<ScalarType>::fillIndexGrid(const sensor_msgs::PointCloud2& rosMsg, const size_t pointCount,
                                                            DataPoints& cloud)
 {
@@ -227,9 +254,25 @@ void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_m
         fillColorDataIntoView(rosMsg, fieldNames, pointCount, view);
     }
 
+    // Per-point absolute timestamp stored as double precision (Hesai LiDAR)
+    if (pointCloud.descriptorExists("timestamp"))
+    {
+        View view(pointCloud.getDescriptorViewByName("timestamp"));
+        const std::string fieldName{ "timestamp" };
+        fillPerPointAbsoluteTimestampDataIntoView(rosMsg, fieldName, pointCount, view);
+    }
+
+    // Per-point absolute timestamp stored as double precision (Hesai LiDAR)
+    if (pointCloud.descriptorExists("ring"))
+    {
+        View view(pointCloud.getDescriptorViewByName("ring"));
+        const std::string fieldName{ "ring" };
+        fillPerPointRingDataIntoView(rosMsg, fieldName, pointCount, view);
+    }
+
     // Scalar descriptors.
-    const FieldNamesList preprocessedFieldLabels{ "xyz",   "x",   "y",    "z", "normals", "normal_x", "normal_y", "normal_z",
-                                                  "color", "rgb", "rgba", "r", "g",       "b",        "a" };
+    const FieldNamesList preprocessedFieldLabels{ "xyz", "x",    "y", "z", "normals", "normal_x", "normal_y",  "normal_z", "color",
+                                                  "rgb", "rgba", "r", "g", "b",       "a",        "timestamp", "ring" };
     for (const auto& field : rosMsg.fields)
     {
         // Ignore descriptors that we have previously written into our point cloud matrix.

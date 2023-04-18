@@ -84,6 +84,31 @@ private:
                                       View& view);
 
     /**
+     * @brief Fills data from a Lidar Ring descriptor into a Pointmatcher point cloud.
+     * @remark This method is needed because Hesai Lidars rings are usually encoded as 16-bit uints, not floating-point.
+     * 
+     * @param rosMsg 
+     * @param fieldName 
+     * @param pointCount 
+     * @param view 
+     */
+    static void fillPerPointRingDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const std::string& fieldName, const size_t pointCount,
+                                             View& view);
+
+    /**
+     * @brief Fills data from an Absolute Timestamp descriptor into a Pointmatcher point cloud.
+     * @remark This method is needed because Hesai Lidars store their timestamps in Unix Time, which breaks downstream nodes that expect a relative stamp.
+     * This method transforms the timestamp to be relative to the start of the Lidar spin.
+     * 
+     * @param rosMsg 
+     * @param fieldName 
+     * @param pointCount 
+     * @param view 
+     */
+    static void fillPerPointAbsoluteTimestampDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const std::string& fieldName,
+                                                          const size_t pointCount, View& view);
+
+    /**
      * @brief Fills the 'index grid' from a ROS message into a Pointmatcher point cloud.
      * @remark This method expectes the ROS message to contain a non-dense (organized) point cloud.
      * 
