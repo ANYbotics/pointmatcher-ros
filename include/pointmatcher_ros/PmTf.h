@@ -21,10 +21,10 @@ namespace pointmatcher_ros
 class PmTf
 {
 public:
-    ros::Time stamp_;
+    ros::Time stamp_{ 0 };
     std::string sourceFrameId_;
     std::string targetFrameId_;
-    PmTfParameters parameters_;
+    PmTfParameters parameters_{ Pm::Matrix::Identity(4, 4) };
 
 protected:
     std::shared_ptr<PmTransformator> transformator_;
