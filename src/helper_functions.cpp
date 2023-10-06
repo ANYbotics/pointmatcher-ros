@@ -4,21 +4,21 @@
 namespace pointmatcher_ros
 {
 
-PmTf tfMsgToPmTf(const geometry_msgs::TransformStamped& tfMsg)
+PmTf convertRosTfMsgToPmTf(const geometry_msgs::TransformStamped& tfMsg)
 {
     tf::StampedTransform tf;
     tf::transformStampedMsgToTF(tfMsg, tf);
-    return pointmatcher_ros::tfToPmTf(tf);
+    return pointmatcher_ros::convertRosTfToPmTf(tf);
 }
 
-geometry_msgs::TransformStamped pmTfToTfMsg(const PmTf& pmTf)
+geometry_msgs::TransformStamped convertPmTfToTfMsg(const PmTf& pmTf)
 {
     geometry_msgs::TransformStamped tfMsg;
-    tf::transformStampedTFToMsg(pointmatcher_ros::pmTfToTf(pmTf), tfMsg);
+    tf::transformStampedTFToMsg(pointmatcher_ros::convertPmTfToTf(pmTf), tfMsg);
     return tfMsg;
 }
 
-PmTf tfToPmTf(const tf::StampedTransform& tf)
+PmTf convertRosTfToPmTf(const tf::StampedTransform& tf)
 {
     PmTf pmTf;
     pmTf.sourceFrameId_ = tf.child_frame_id_;
@@ -30,7 +30,7 @@ PmTf tfToPmTf(const tf::StampedTransform& tf)
     return pmTf;
 }
 
-tf::StampedTransform pmTfToTf(const PmTf& pmTf)
+tf::StampedTransform convertPmTfToTf(const PmTf& pmTf)
 {
     tf::StampedTransform tf;
     tf.child_frame_id_ = pmTf.sourceFrameId_;
@@ -51,7 +51,7 @@ tf::StampedTransform pmTfToTf(const PmTf& pmTf)
     return tf;
 }
 
-geometry_msgs::PoseStamped tfToPose(const tf::StampedTransform& tf)
+geometry_msgs::PoseStamped convertRosTfToRosTfMsg(const tf::StampedTransform& tf)
 {
     geometry_msgs::PoseStamped poseStamped;
     poseStamped.header.frame_id = tf.frame_id_;
@@ -67,7 +67,7 @@ geometry_msgs::PoseStamped tfToPose(const tf::StampedTransform& tf)
     return poseStamped;
 }
 
-tf::StampedTransform poseToTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId)
+tf::StampedTransform convertPoseStampedMsgToRosTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId)
 {
     const tf::Vector3 origin(pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
     const tf::Quaternion rotation(pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w);
@@ -80,7 +80,7 @@ tf::StampedTransform poseToTf(const geometry_msgs::PoseStamped& pose, const std:
     return tf;
 }
 
-tf::StampedTransform poseWithCovToTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId)
+tf::StampedTransform convertPoseWithCovMsgToRosTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId)
 {
     const tf::Vector3 origin(pose.pose.pose.position.x, pose.pose.pose.position.y, pose.pose.pose.position.z);
     const tf::Quaternion rotation(
@@ -94,19 +94,19 @@ tf::StampedTransform poseWithCovToTf(const geometry_msgs::PoseWithCovarianceStam
     return tf;
 }
 
-PmTf poseWithCovToPmTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId)
+PmTf convertPoseWithCovMsgToPmTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId)
 {
-    return tfToPmTf(poseWithCovToTf(pose, childFrameId));
+    return convertRosTfToPmTf(convertPoseWithCovMsgToRosTf(pose, childFrameId));
 }
 
-geometry_msgs::PoseStamped pmTfToPose(const PmTf& pmTf)
+geometry_msgs::PoseStamped convertPmTfToPose(const PmTf& pmTf)
 {
-    return tfToPose(pmTfToTf(pmTf));
+    return convertRosTfToRosTfMsg(convertPmTfToTf(pmTf));
 }
 
-PmTf poseToPmTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId)
+PmTf convertPoseStampedMsgToPmTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId)
 {
-    return tfToPmTf(poseToTf(pose, childFrameId));
+    return convertRosTfToPmTf(convertPoseStampedMsgToRosTf(pose, childFrameId));
 }
 
 } // namespace pointmatcher_ros

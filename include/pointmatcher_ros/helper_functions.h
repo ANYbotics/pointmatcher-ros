@@ -26,35 +26,35 @@ namespace pointmatcher_ros
  * @param tfMsg ROS transform msg.
  * @return Pointmatcher transformation.
  */
-PmTf tfMsgToPmTf(const geometry_msgs::TransformStamped& tfMsg);
+PmTf convertRosTfMsgToPmTf(const geometry_msgs::TransformStamped& tfMsg);
 
 /*!
  * Creates a ROS transform msg from a pointmatcher transformation.
  * @param pmTf Pointmatcher transformation.
  * @return ROS transform msg.
  */
-geometry_msgs::TransformStamped pmTfToTfMsg(const PmTf& pmTf);
+geometry_msgs::TransformStamped convertPmTfToTfMsg(const PmTf& pmTf);
 
 /*!
  * Creates a pointmatcher transformation from a ROS transformation.
  * @param tf ROS transformation.
  * @return Pointmatcher transformation.
  */
-PmTf tfToPmTf(const tf::StampedTransform& tf);
+PmTf convertRosTfToPmTf(const tf::StampedTransform& tf);
 
 /*!
  * Creates a ROS transformation from a pointmatcher transformation.
  * @param pmTf Pointmatcher transformation.
  * @return ROS transformation.
  */
-tf::StampedTransform pmTfToTf(const PmTf& pmTf);
+tf::StampedTransform convertPmTfToTf(const PmTf& pmTf);
 
 /*!
  * Creates a pose from a ROS transformation.
  * @param tf ROS transformation.
  * @return Pose.
  */
-geometry_msgs::PoseStamped tfToPose(const tf::StampedTransform& tf);
+geometry_msgs::PoseStamped convertRosTfToRosTfMsg(const tf::StampedTransform& tf);
 
 /*!
  * Creates a ROS transformation from a pose.
@@ -62,7 +62,7 @@ geometry_msgs::PoseStamped tfToPose(const tf::StampedTransform& tf);
  * @param childFrameId Child frame id.
  * @return ROS transformation.
  */
-tf::StampedTransform poseToTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId);
+tf::StampedTransform convertPoseStampedMsgToRosTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId);
 
 /*!
  * Creates a ROS transformation from a pose with covariance.
@@ -70,7 +70,7 @@ tf::StampedTransform poseToTf(const geometry_msgs::PoseStamped& pose, const std:
  * @param childFrameId Child frame id.
  * @return transformation.
  */
-tf::StampedTransform poseWithCovToTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId);
+tf::StampedTransform convertPoseWithCovMsgToRosTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId);
 
 /*!
  * Creates a pointmatcher transformation from a pose with covariance.
@@ -78,14 +78,14 @@ tf::StampedTransform poseWithCovToTf(const geometry_msgs::PoseWithCovarianceStam
  * @param childFrameId Child frame id.
  * @return Pointmatcher transformation.
  */
-PmTf poseWithCovToPmTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId);
+PmTf convertPoseWithCovMsgToPmTf(const geometry_msgs::PoseWithCovarianceStamped& pose, const std::string& childFrameId);
 
 /*!
  * Creates a pose from a pointmatcher transformation.
  * @param pmTf Pointmatcher transformation.
  * @return Pose.
  */
-geometry_msgs::PoseStamped pmTfToPose(const PmTf& pmTf);
+geometry_msgs::PoseStamped convertPmTfToPose(const PmTf& pmTf);
 
 /*!
  * Creates a pointmatcher transformation from a pose.
@@ -93,6 +93,6 @@ geometry_msgs::PoseStamped pmTfToPose(const PmTf& pmTf);
  * @param childFrameId Child frame id.
  * @return Pointmatcher transformation.
  */
-PmTf poseToPmTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId);
+PmTf convertPoseStampedMsgToPmTf(const geometry_msgs::PoseStamped& pose, const std::string& childFrameId);
 
 } // namespace pointmatcher_ros

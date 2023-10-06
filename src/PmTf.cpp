@@ -21,7 +21,7 @@ PmTf PmTf::FromRosTfMsg(const geometry_msgs::TransformStamped& tfMsg)
 
 void PmTf::fromRosTfMsg(const geometry_msgs::TransformStamped& tfMsg)
 {
-    *this = tfMsgToPmTf(tfMsg);
+    *this = convertRosTfMsgToPmTf(tfMsg);
 }
 
 geometry_msgs::TransformStamped PmTf::toRosTfMsg() const
@@ -33,7 +33,7 @@ geometry_msgs::TransformStamped PmTf::toRosTfMsg() const
 
 void PmTf::toRosTfMsg(geometry_msgs::TransformStamped& tfMsg) const
 {
-    tfMsg = pmTfToTfMsg(*this);
+    tfMsg = convertPmTfToTfMsg(*this);
 }
 
 PmTf PmTf::FromRosTf(const tf::StampedTransform& tf)
@@ -45,7 +45,7 @@ PmTf PmTf::FromRosTf(const tf::StampedTransform& tf)
 
 void PmTf::fromRosTf(const tf::StampedTransform& tf)
 {
-    *this = tfToPmTf(tf);
+    *this = convertRosTfToPmTf(tf);
 }
 
 tf::StampedTransform PmTf::toRosTf() const
@@ -57,7 +57,7 @@ tf::StampedTransform PmTf::toRosTf() const
 
 void PmTf::toRosTf(tf::StampedTransform& tf) const
 {
-    tf = pmTfToTf(*this);
+    tf = convertPmTfToTf(*this);
 }
 
 PmTf PmTf::inverse() const
