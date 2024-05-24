@@ -2,7 +2,7 @@
 
   <name>pointmatcher_ros</name>
   <description>Bridge between libpointmatcher and ROS.</description>
-  <version>1.4.19</version>
+  <version>1.4.20</version>
   <maintainer email="rdiethelm@anybotics.com">Remo Diethelm</maintainer>
   <maintainer email="ynava@anybotics.com">Yoshua Nava</maintainer>
   <author email="stephane.magnenat@mavt.ethz.ch">Stéphane Magnenat</author>
