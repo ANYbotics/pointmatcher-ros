@@ -1,14 +1,13 @@
 #ifndef __POINTMATCHER_ROS_TRANSFORM_H
 #define __POINTMATCHER_ROS_TRANSFORM_H
 
-// eigen
-#include <Eigen/Eigen>
-
-// nav_msgs
-#include <nav_msgs/Odometry.h>
-
+#ifndef ROS2_BUILD
 // tf2_ros
 #include <tf2_ros/transform_listener.h>
+#else
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/buffer.h>
+#endif
 
 // pointmatcher
 #include <pointmatcher/PointMatcher.h>
@@ -16,58 +15,15 @@
 // pointmatcher_ros
 #include "pointmatcher_ros/StampedPointCloud.h"
 
+#ifndef ROS2_BUILD
 namespace ros
 {
 struct Time;
 }
-
-namespace tf
-{
-struct Transform;
-struct TransformListener;
-struct StampedTransform;
-} // namespace tf
+#endif
 
 namespace pointmatcher_ros
 {
-// tf to Eigen
-template<typename T>
-typename PointMatcher<T>::TransformationParameters transformListenerToEigenMatrix(const tf::TransformListener& listener,
-                                                                                  const std::string& target, const std::string& source,
-                                                                                  const ros::Time& stamp);
-
-// Odom to Eigen
-template<typename T>
-typename PointMatcher<T>::TransformationParameters odomMsgToEigenMatrix(const nav_msgs::Odometry& odom);
-
-// Pose to Eigen
-template<typename T>
-typename PointMatcher<T>::TransformationParameters poseMsgToEigenMatrix(const geometry_msgs::Pose& pose);
-
-// Eigen to Odom
-template<typename T>
-nav_msgs::Odometry eigenMatrixToOdomMsg(const typename PointMatcher<T>::TransformationParameters& inTr, const std::string& frame_id,
-                                        const ros::Time& stamp);
-
-// Eigen to Pose
-template<typename T>
-geometry_msgs::Pose eigenMatrixToPoseMsg(const typename PointMatcher<T>::TransformationParameters& inTr);
-
-
-// Eigen to Transform
-template<typename T>
-tf::Transform eigenMatrixToTransform(const typename PointMatcher<T>::TransformationParameters& inTr);
-
-// Eigen to Stamped Transform
-template<typename T>
-tf::StampedTransform eigenMatrixToStampedTransform(const typename PointMatcher<T>::TransformationParameters& inTr,
-                                                   const std::string& target, const std::string& source, const ros::Time& stamp);
-
-// 2D / 3D transform
-template<typename T>
-typename PointMatcher<T>::TransformationParameters eigenMatrixToDim(const typename PointMatcher<T>::TransformationParameters& matrix,
-                                                                    int dimp1);
-
 /**
  * @brief Transforms a point cloud to a target frame, using a fixed frame as reference.
  *
@@ -77,9 +33,13 @@ typename PointMatcher<T>::TransformationParameters eigenMatrixToDim(const typena
  * @param pointCloud[in/out]  Point cloud to transform.
  * @return true       If successul, false otherwise.
  */
+#ifndef ROS2_BUILD
 bool transformCloudToFrame(const std::string& fixedFrame, const std::string& targetFrame, const ros::Time& targetStamp,
                            const tf2_ros::Buffer& tfBuffer, StampedPointCloud& pointCloud, double waitTimeTfLookup = 0.1);
-
+#else
+bool transformCloudToFrame(std::string const& fixedFrame, std::string const& targetFrame, rclcpp::Time const& targetStamp,
+                           tf2_ros::Buffer const& tfBuffer, StampedPointCloud& pointCloud, double waitTimeTfLookup = 0.1);
+#endif
 
 } // namespace pointmatcher_ros
 

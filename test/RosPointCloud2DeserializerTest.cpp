@@ -16,7 +16,11 @@
 #include <Eigen/Dense>
 
 // sensor_msgs
+#ifndef ROS2_BUILD
 #include <sensor_msgs/PointCloud2.h>
+#else
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#endif
 
 // pointmacher_ros
 #include "pointmatcher_ros/RosPointCloud2Deserializer.h"
@@ -56,7 +60,11 @@ public:
         bool isOrganized_{ false };
 
         std::string frameId_{ "sensor" };
+#ifndef ROS2_BUILD
         ros::Time stamp_;
+#else
+        rclcpp::Time stamp_;
+#endif
     };
 
     RosPointCloud2DeserializerTest() = default;
@@ -172,8 +180,14 @@ TEST_F(RosPointCloud2DeserializerTest, EmptyRosMessage)
 {
     // Ros sensor_msgs/PointCloud2 is empty by default.
     // Block motivation: Check base non-initialized values from msg. If at some point the message definition changes and this fails, it will be easier to know why.
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg;
     ASSERT_EQ(rosMsg.header.stamp.toSec(), 0);
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg;
+    ASSERT_EQ(rosMsg.header.stamp.sec, 0);
+    ASSERT_EQ(rosMsg.header.stamp.nanosec, 0);
+#endif
     ASSERT_EQ(rosMsg.header.frame_id, "");
     ASSERT_EQ(rosMsg.fields.size(), 0u);
     ASSERT_FALSE(rosMsg.is_dense);
@@ -202,7 +216,11 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPoints)
 
     // Create point cloud.
     const DataPoints pointCloud = generatePointCloud(parameters);
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg =
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg =
+#endif
         pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
 
     // Deserialize msg.
@@ -230,7 +248,11 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsNormals)
 
     // Create point cloud.
     const DataPoints pointCloud = generatePointCloud(parameters);
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg =
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg =
+#endif
         pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
 
     // Deserialize msg.
@@ -258,7 +280,11 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsColor)
 
     // Create point cloud.
     const DataPoints pointCloud = generatePointCloud(parameters);
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg =
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg =
+#endif
         pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
 
     // Deserialize msg.
@@ -289,7 +315,11 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsColorWithTransparency)
 
     // Create point cloud.
     const DataPoints pointCloud = generatePointCloud(parameters);
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg =
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg =
+#endif
         pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
 
     // Deserialize msg.
@@ -320,7 +350,11 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsScalar)
 
     // Create point cloud.
     const DataPoints pointCloud = generatePointCloud(parameters);
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg =
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg =
+#endif
         pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
 
     // Deserialize msg.
@@ -348,7 +382,11 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsScalarRangeRestricted)
 
     // Create point cloud.
     const DataPoints pointCloud = generatePointCloud(parameters);
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg =
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg =
+#endif
         pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
 
     // Deserialize msg.
@@ -378,7 +416,11 @@ TEST_F(RosPointCloud2DeserializerTest, PointCloud3dPointsNormalsScalars)
 
     // Create point cloud.
     const DataPoints pointCloud = generatePointCloud(parameters);
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 rosMsg =
+#else
+    const sensor_msgs::msg::PointCloud2 rosMsg =
+#endif
         pointmatcher_ros::pointMatcherCloudToRosMsg<ScalarType>(pointCloud, parameters.frameId_, parameters.stamp_);
 
     // Deserialize msg.

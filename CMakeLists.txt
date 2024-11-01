@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.16.3)
 project(pointmatcher_ros)
 
 # Set compiler flags
@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -Wextra -Wpedantic -Werror=return-type)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if("$ENV{ROS_VERSION}" STREQUAL "1")
 
 # Set catkin package dependencies
 set(CATKIN_PACKAGE_DEPENDENCIES
@@ -142,3 +144,100 @@ if(cmake_clang_tools_FOUND)
     CF_FIX
   )
 endif(cmake_clang_tools_FOUND)
+
+else() # ROS version 2
+
+set(PACKAGE_DEPENDENCIES
+  visualization_msgs
+  pcl_conversions
+  libpointmatcher
+  tf2_eigen
+  sensor_msgs
+  nav_msgs
+  rclcpp
+  Boost
+  tf2
+  )
+
+find_package(ament_cmake REQUIRED)
+
+foreach(PKG ${PACKAGE_DEPENDENCIES})
+  find_package(${PKG} REQUIRED)
+endforeach()
+
+include(cmake/configExtras.cmake)
+
+########################
+## Library definition ##
+########################
+
+add_library(${PROJECT_NAME} SHARED
+  src/helper_functions.cpp
+  src/serialization.cpp
+  src/transform.cpp
+  src/IcpMatchesPublisher.cpp
+  src/PmTf.cpp
+  src/PointMatcherFilterInterface.cpp
+  src/StampedPointCloudPublisher.cpp
+  src/RosPointCloud2Deserializer.cpp
+  src/StampedPointCloud.cpp
+  src/visualization_utils.cpp
+  )
+
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+  )
+
+ament_target_dependencies(${PROJECT_NAME} ${PACKAGE_DEPENDENCIES})
+
+#############
+## Install ##
+#############
+
+install(DIRECTORY include/
+  DESTINATION include/${PROJECT_NAME}
+  )
+
+install(TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  )
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(${PACKAGE_DEPENDENCIES})
+
+#############
+## Testing ##
+#############
+
+if(BUILD_TESTING)
+
+  find_package(ament_cmake_gtest REQUIRED)
+  
+  ament_add_gtest(test_${PROJECT_NAME}
+    test/RosPointCloud2DeserializerTest.cpp
+    )
+
+  target_link_libraries(test_${PROJECT_NAME}
+    ${PROJECT_NAME}
+    )
+
+  ###################
+  ## Code_coverage ##
+  ###################
+
+  find_package(cmake_code_coverage QUIET)
+
+  if(cmake_code_coverage_FOUND)
+    add_gtest_coverage(TEST_BUILD_TARGETS test_${PROJECT_NAME})
+  endif()
+
+endif()
+
+ament_package(CONFIG_EXTRAS cmake/configExtras.cmake)
+
+endif()

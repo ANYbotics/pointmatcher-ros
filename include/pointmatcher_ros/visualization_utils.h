@@ -3,10 +3,17 @@
 #include <optional>
 #include <string>
 
+#ifndef ROS2_BUILD
 #include <ros/time.h>
 
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#else
+#include <rclcpp/rclcpp.hpp>
+
+#include <visualization_msgs/msg/marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+#endif
 
 #include "pointmatcher_ros/Colors.h"
 #include "pointmatcher_ros/StampedPointCloud.h"
@@ -45,10 +52,16 @@ struct NormalVectorsMarkerGenerationParameters
  * @param color         RGB color for markers.
  * @return std::optional<visualization_msgs::Marker>    (Optional) marker representing surface normal vectors.
  */
+#ifndef ROS2_BUILD
 std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors(const StampedPointCloud& pointCloud,
                                                                                  const ros::Time& timestamp,
                                                                                  const NormalVectorsMarkerGenerationParameters& parameters,
                                                                                  const RgbaColorMap::Values& color);
+#else
+std::optional<visualization_msgs::msg::Marker> generateMarkersForSurfaceNormalVectors(
+    StampedPointCloud const& pointCloud, rclcpp::Time const& timestamp, NormalVectorsMarkerGenerationParameters const& parameters,
+    RgbaColorMap::Values const& color);
+#endif
 
 /**
  * @brief Generates tile markers for a given set of surface normals vectors.
@@ -59,10 +72,16 @@ std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors
  * @param color         RGB color for markers.
  * @return std::optional<visualization_msgs::Marker>    (Optional) marker representing surface normal vectors as tiles
  */
+#ifndef ROS2_BUILD
 std::optional<visualization_msgs::MarkerArray> generateMarkersForSurfaceNormalPatches(
     const StampedPointCloud& pointCloud,
     const ros::Time& timestamp,
     const NormalVectorsMarkerGenerationParameters& parameters,
     const RgbaColorMap::Values& color);
+#else
+std::optional<visualization_msgs::msg::MarkerArray> generateMarkersForSurfaceNormalPatches(
+    StampedPointCloud const& pointCloud, rclcpp::Time const& timestamp, NormalVectorsMarkerGenerationParameters const& parameters,
+    RgbaColorMap::Values const& color);
+#endif
 
 } // namespace pointmatcher_ros

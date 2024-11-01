@@ -2,7 +2,13 @@
 
 #include <optional>
 
+#ifndef ROS2_BUILD
 #include <ros/ros.h>
+#else
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <visualization_msgs/msg/marker.hpp>
+#endif
 
 #include <pointmatcher/PointMatcher.h>
 
@@ -70,7 +76,11 @@ public:
      * @param nodeHandle    ROS node handle.
      * @param parametersKey Key for the publisher parameters.
      */
+#ifndef ROS2_BUILD
     void advertiseFromRosParameters(ros::NodeHandle nodeHandle, const std::string& parametersKey);
+#else
+    void advertiseFromRosParameters(rclcpp::Node::SharedPtr const& nodeHandle, std::string const& parametersKey);
+#endif
 
     /**
      * @brief Whether the publisher is latched.
@@ -109,7 +119,11 @@ private:
      * 
      * @param nodeHandle  ROS node handle.
      */
+#ifndef ROS2_BUILD
     void setUpPublishers(ros::NodeHandle nodeHandle);
+#else
+    void setUpPublishers(rclcpp::Node::SharedPtr const& nodeHandle);
+#endif
 
     /**
      * @brief Publishes the matched points point clouds.
@@ -130,10 +144,17 @@ private:
     RgbaColorMap colorMap_;
 
     //! ROS publishers.
+#ifndef ROS2_BUILD
     std::optional<ros::Publisher> readingPointsMatchedPointCloudPublisher_;
     std::optional<ros::Publisher> readingPointsMatchedNormalMarkersPublisher_;
     std::optional<ros::Publisher> referencePointsMatchedPointCloudPublisher_;
     std::optional<ros::Publisher> referencePointsMatchedNormalMarkersPublisher_;
+#else
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr readingPointsMatchedPointCloudPublisher_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr readingPointsMatchedNormalMarkersPublisher_;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr referencePointsMatchedPointCloudPublisher_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr referencePointsMatchedNormalMarkersPublisher_;
+#endif
 
     //! Reading points that were matched against the map.
     StampedPointCloud readingPointsMatchedPointCloud_;

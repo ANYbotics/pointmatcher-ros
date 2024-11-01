@@ -1,15 +1,25 @@
 
 #include "pointmatcher_ros/RosPointCloud2Deserializer.h"
 
+#ifndef ROS2_BUILD
 // sensor_msgs
 #include <sensor_msgs/point_cloud2_iterator.h>
+#else
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/point_cloud2_iterator.hpp>
+#endif
 
 namespace pointmatcher_ros
 {
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 typename RosPointCloud2Deserializer<ScalarType>::DataPoints RosPointCloud2Deserializer<ScalarType>::deserialize(
     const sensor_msgs::PointCloud2& rosMsg)
+#else
+typename RosPointCloud2Deserializer<ScalarType>::DataPoints RosPointCloud2Deserializer<ScalarType>::deserialize(
+    sensor_msgs::msg::PointCloud2 const& rosMsg)
+#endif
 {
     // If the msg is empty return an empty point cloud.
     if (rosMsg.fields.empty())
@@ -39,9 +49,14 @@ typename RosPointCloud2Deserializer<ScalarType>::DataPoints RosPointCloud2Deseri
 }
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::extractFieldLabels(const sensor_msgs::PointCloud2& rosMsg,
                                                                 Labels& featLabels,
                                                                 Labels& descLabels)
+#else
+void RosPointCloud2Deserializer<ScalarType>::extractFieldLabels(sensor_msgs::msg::PointCloud2 const& rosMsg, Labels& featLabels,
+                                                                Labels& descLabels)
+#endif
 {
     // Conversions of descriptor fields from pcl.
     // see http://www.ros.org/wiki/pcl/Overview
@@ -102,8 +117,13 @@ void RosPointCloud2Deserializer<ScalarType>::extractFieldLabels(const sensor_msg
 }
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::fillScalarDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const std::string& fieldName,
                                                                     const size_t pointCount, View& view)
+#else
+void RosPointCloud2Deserializer<ScalarType>::fillScalarDataIntoView(sensor_msgs::msg::PointCloud2 const& rosMsg,
+                                                                    std::string const& fieldName, size_t pointCount, View& view)
+#endif
 {
     // Use iterator to read data and write it into view.
     sensor_msgs::PointCloud2ConstIterator<ScalarType> iter(rosMsg, fieldName);
@@ -114,9 +134,15 @@ void RosPointCloud2Deserializer<ScalarType>::fillScalarDataIntoView(const sensor
 }
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::fillVectorDataIntoView(const sensor_msgs::PointCloud2& rosMsg,
                                                                     const FieldNamesList& fieldNames, const bool is3dPointCloud,
                                                                     const size_t pointCount, View& view)
+#else
+void RosPointCloud2Deserializer<ScalarType>::fillVectorDataIntoView(sensor_msgs::msg::PointCloud2 const& rosMsg,
+                                                                    FieldNamesList const& fieldNames, bool is3dPointCloud,
+                                                                    size_t pointCount, View& view)
+#endif
 {
     // Create iterators to read data from the message buffer.
     sensor_msgs::PointCloud2ConstIterator<ScalarType> iterX(rosMsg, fieldNames[0]);
@@ -144,8 +170,13 @@ void RosPointCloud2Deserializer<ScalarType>::fillVectorDataIntoView(const sensor
 }
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::fillColorDataIntoView(const sensor_msgs::PointCloud2& rosMsg, const FieldNamesList& fieldNames,
                                                                    const size_t pointCount, View& view)
+#else
+void RosPointCloud2Deserializer<ScalarType>::fillColorDataIntoView(sensor_msgs::msg::PointCloud2 const& rosMsg,
+                                                                   FieldNamesList const& fieldNames, size_t pointCount, View& view)
+#endif
 {
     sensor_msgs::PointCloud2ConstIterator<uint8_t> iterR(rosMsg, fieldNames[0]);
     sensor_msgs::PointCloud2ConstIterator<uint8_t> iterG(rosMsg, fieldNames[1]);
@@ -165,8 +196,13 @@ void RosPointCloud2Deserializer<ScalarType>::fillColorDataIntoView(const sensor_
 }
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::fillPerPointRingDataIntoView(const sensor_msgs::PointCloud2& rosMsg,
                                                                           const std::string& fieldName, const size_t pointCount, View& view)
+#else
+void RosPointCloud2Deserializer<ScalarType>::fillPerPointRingDataIntoView(sensor_msgs::msg::PointCloud2 const& rosMsg,
+                                                                          std::string const& fieldName, size_t pointCount, View& view)
+#endif
 {
     // Use iterator to read data and write it into view.
     sensor_msgs::PointCloud2ConstIterator<uint16_t> iter(rosMsg, fieldName);
@@ -177,13 +213,25 @@ void RosPointCloud2Deserializer<ScalarType>::fillPerPointRingDataIntoView(const 
 }
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::fillPerPointAbsoluteTimestampDataIntoView(const sensor_msgs::PointCloud2& rosMsg,
                                                                                        const std::string& fieldName,
                                                                                        const size_t pointCount, View& view)
+#else
+void RosPointCloud2Deserializer<ScalarType>::fillPerPointAbsoluteTimestampDataIntoView(sensor_msgs::msg::PointCloud2 const& rosMsg,
+                                                                                       std::string const& fieldName, size_t pointCount,
+                                                                                       View& view)
+#endif
 {
     // Use iterator to read data and write it into view.
     sensor_msgs::PointCloud2ConstIterator<double> iter(rosMsg, fieldName);
+
+#ifndef ROS2_BUILD
     const double scanTimestamp{ rosMsg.header.stamp.toSec() };
+#else
+    double const scanTimestamp = rclcpp::Time(rosMsg.header.stamp).seconds();
+#endif
+
     for (size_t i = 0; i < pointCount; ++i, ++iter)
     {
         view(0, i) = static_cast<ScalarType>((*iter) - scanTimestamp);
@@ -192,15 +240,20 @@ void RosPointCloud2Deserializer<ScalarType>::fillPerPointAbsoluteTimestampDataIn
 
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::fillIndexGrid(const sensor_msgs::PointCloud2& rosMsg, const size_t pointCount,
                                                            DataPoints& cloud)
+#else
+void RosPointCloud2Deserializer<ScalarType>::fillIndexGrid(sensor_msgs::msg::PointCloud2 const& rosMsg, size_t pointCount,
+                                                           DataPoints& cloud)
+#endif
 {
     using ArrayBooleans = Eigen::Array<bool, 1, Eigen::Dynamic>;
 
     // Compute the size of the index grid.
     const Index nbColumns{ rosMsg.height };
     const Index nbRows{ rosMsg.width };
-    assert(nbColumns * nbRows == pointCount);
+    assert((std::size_t)(nbColumns * nbRows) == pointCount);
 
     // Initialize the index grid.
     cloud.allocateIndexGrid(nbColumns, nbRows);
@@ -225,8 +278,13 @@ void RosPointCloud2Deserializer<ScalarType>::fillIndexGrid(const sensor_msgs::Po
 }
 
 template<typename ScalarType>
+#ifndef ROS2_BUILD
 void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(const sensor_msgs::PointCloud2& rosMsg, const bool is3dPointCloud,
                                                                   DataPoints& pointCloud)
+#else
+void RosPointCloud2Deserializer<ScalarType>::fillPointCloudValues(sensor_msgs::msg::PointCloud2 const& rosMsg, bool is3dPointCloud,
+                                                                  DataPoints& pointCloud)
+#endif
 {
     const size_t pointCount{ rosMsg.width * rosMsg.height };
 

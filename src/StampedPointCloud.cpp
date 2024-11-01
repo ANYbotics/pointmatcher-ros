@@ -2,6 +2,7 @@
 #include "pointmatcher_ros/StampedPointCloud.h"
 
 // c++ standard library
+#include <chrono>
 #include <cmath>
 
 // pcl
@@ -23,14 +24,22 @@ StampedPointCloud::StampedPointCloud() :
     clear();
 }
 
+#ifndef ROS2_BUILD
 StampedPointCloud StampedPointCloud::FromFile(const std::string& filePath, const ros::Time& stamp, const std::string& frameId)
+#else
+StampedPointCloud StampedPointCloud::FromFile(std::string const& filePath, rclcpp::Time const& stamp, std::string const& frameId)
+#endif
 {
     StampedPointCloud pointCloud;
     pointCloud.fromFile(filePath, stamp, frameId);
     return pointCloud;
 }
 
+#ifndef ROS2_BUILD
 bool StampedPointCloud::fromFile(const std::string& filePath, const ros::Time& stamp, const std::string& frameId)
+#else
+bool StampedPointCloud::fromFile(std::string const& filePath, rclcpp::Time const& stamp, std::string const& frameId)
+#endif
 {
     pcl::PLYReader reader;
     pcl::PointCloud<pcl::PointXYZINormal> pointCloudPcl;
@@ -47,13 +56,26 @@ bool StampedPointCloud::fromFile(const std::string& filePath, const ros::Time& s
     {
         if (std::isnan(point->curvature))
         {
+#ifndef ROS2_BUILD
             ROS_DEBUG_STREAM("Removing point (" << std::distance(pointCloudPcl.begin(), point) << ") with curvature == NaN.");
+#else
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                                "Removing point (" << std::distance(pointCloudPcl.begin(), point) << ") with curvature == NaN.");
+#endif
             pointCloudPcl.erase(point);
         }
     }
+
+#ifndef ROS2_BUILD
     ROS_INFO_STREAM("Erased " << size - pointCloudPcl.size() << " invalid points from the point cloud.");
 
     sensor_msgs::PointCloud2 pointCloudRos;
+#else
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                       "Erased " << size - pointCloudPcl.size() << " invalid points from the point cloud.");
+
+    sensor_msgs::msg::PointCloud2 pointCloudRos;
+#endif
     pcl::toROSMsg(pointCloudPcl, pointCloudRos);
     fromRosMsg(pointCloudRos);
     return true;
@@ -61,7 +83,11 @@ bool StampedPointCloud::fromFile(const std::string& filePath, const ros::Time& s
 
 void StampedPointCloud::toFile(const std::string& filePath) const
 {
+#ifndef ROS2_BUILD
     const sensor_msgs::PointCloud2 pointCloudRos = toRosMsg();
+#else
+    const sensor_msgs::msg::PointCloud2 pointCloudRos = toRosMsg();
+#endif
     pcl::PointCloud<pcl::PointXYZINormal> pointCloudPcl;
     pcl::fromROSMsg(pointCloudRos, pointCloudPcl);
 
@@ -69,26 +95,46 @@ void StampedPointCloud::toFile(const std::string& filePath) const
     writer.write(filePath, pointCloudPcl, false, false);
 }
 
+#ifndef ROS2_BUILD
 StampedPointCloud StampedPointCloud::FromRosMsg(const sensor_msgs::PointCloud2& msg)
+#else
+StampedPointCloud StampedPointCloud::FromRosMsg(sensor_msgs::msg::PointCloud2 const& msg)
+#endif
 {
     StampedPointCloud pointCloud;
     pointCloud.fromRosMsg(msg);
     return pointCloud;
 }
 
+#ifndef ROS2_BUILD
 void StampedPointCloud::fromRosMsg(const sensor_msgs::PointCloud2& msg)
+#else
+void StampedPointCloud::fromRosMsg(sensor_msgs::msg::PointCloud2 const& msg)
+#endif
 {
     header_ = msg.header;
     dataPoints_ = RosPointCloud2Deserializer<float>::deserialize(msg);
 }
 
+#ifndef ROS2_BUILD
 sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time stamp) const
+#else
+sensor_msgs::msg::PointCloud2 StampedPointCloud::toRosMsg(rclcpp::Time const& stamp) const
+#endif
 {
+#ifndef ROS2_BUILD
     sensor_msgs::PointCloud2 msg;
+#else
+    sensor_msgs::msg::PointCloud2 msg;
+#endif
     toRosMsg(msg);
 
     // Check that the timestamp is well-defined.
+#ifndef ROS2_BUILD
     if (stamp != ros::Time(0))
+#else
+    if (stamp != rclcpp::Time())
+#endif
     {
         msg.header.stamp = stamp;
     }
@@ -96,7 +142,11 @@ sensor_msgs::PointCloud2 StampedPointCloud::toRosMsg(const ros::Time stamp) cons
     return msg;
 }
 
+#ifndef ROS2_BUILD
 void StampedPointCloud::toRosMsg(sensor_msgs::PointCloud2& msg) const
+#else
+void StampedPointCloud::toRosMsg(sensor_msgs::msg::PointCloud2& msg) const
+#endif
 {
     msg = pointmatcher_ros::pointMatcherCloudToRosMsg<float>(dataPoints_, header_.frame_id, header_.stamp);
 }
@@ -121,7 +171,11 @@ unsigned int StampedPointCloud::getSize() const
 
 void StampedPointCloud::clear()
 {
+#ifndef ROS2_BUILD
     header_ = std_msgs::Header();
+#else
+    header_ = std_msgs::msg::Header();
+#endif
     PmDataPoints::Labels featLabels;
     featLabels.push_back(PmDataPoints::Label("x", 1));
     featLabels.push_back(PmDataPoints::Label("y", 1));
@@ -154,18 +208,20 @@ PmDataPointsConstView StampedPointCloud::getDescriptorConstView(const std::strin
     return dataPoints_.getDescriptorViewByName(name);
 }
 
-void StampedPointCloud::setDescriptorFromDescriptor(const std::string& sourceDescriptorName, const std::string& targetDescriptorName)
-{
-    dataPoints_.addDescriptor(sourceDescriptorName, dataPoints_.getDescriptorViewByName(targetDescriptorName));
-}
-
 bool StampedPointCloud::transform(const PmTf& tf)
 {
     // Validate the transformation frames.
     if (tf.sourceFrameId_ != header_.frame_id)
     {
+#ifndef ROS2_BUILD
         ROS_ERROR_STREAM("Point cloud transformation failed due to inconsistent frames. "
                          << "Point cloud frame: '" << header_.frame_id << "', transformation source frame: '" << tf.sourceFrameId_ << "'.");
+#else
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                            "Point cloud transformation failed due to inconsistent frames. "
+                                << "Point cloud frame: '" << header_.frame_id << "', transformation source frame: '" << tf.sourceFrameId_
+                                << "'.");
+#endif
         return false;
     }
     header_.frame_id = tf.targetFrameId_;
@@ -182,21 +238,11 @@ bool StampedPointCloud::transform(const PmTfParameters& transform)
     }
     catch (const std::exception& exception)
     {
+#ifndef ROS2_BUILD
         ROS_ERROR_STREAM("Caught exception while transforming point cloud: " << exception.what());
-        return false;
-    }
-}
-
-bool StampedPointCloud::filter(PmPointCloudFilter& filter)
-{
-    try
-    {
-        filter.inPlaceFilter(dataPoints_);
-        return true;
-    }
-    catch (const std::exception& exception)
-    {
-        ROS_ERROR_STREAM("Caught exception while filtering point cloud: " << exception.what());
+#else
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("PointmatcherRos"), "Caught exception while transforming point cloud: " << exception.what());
+#endif
         return false;
     }
 }
@@ -210,21 +256,19 @@ bool StampedPointCloud::filter(PmPointCloudFilters& filters)
     }
     catch (const std::exception& exception)
     {
+#ifndef ROS2_BUILD
         ROS_ERROR_STREAM("Caught exception while filtering point cloud: " << exception.what());
+#else
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("PointmatcherRos"), "Caught exception while filtering point cloud: " << exception.what());
+#endif
         return false;
     }
 }
 
 bool StampedPointCloud::filterByDistance(const float distanceThreshold, const bool keepInside)
 {
-    PmMatrix dummy;
-    return filterByDistance(distanceThreshold, keepInside, dummy);
-}
-
-bool StampedPointCloud::filterByDistance(const float distanceThreshold, const bool keepInside, PmMatrix& newIdToOldId)
-{
     const float distanceThresholdSquared = std::pow(distanceThreshold, 2);
-    newIdToOldId = PmMatrix(1, getSize());
+    PmMatrix newIdToOldId = PmMatrix(1, getSize());
     unsigned int newId = 0;
     for (unsigned int oldId = 0; oldId < getSize(); oldId++)
     {
@@ -238,21 +282,6 @@ bool StampedPointCloud::filterByDistance(const float distanceThreshold, const bo
     dataPoints_.conservativeResize(newId);
     newIdToOldId.conservativeResize(Eigen::NoChange, newId);
     return true;
-}
-
-bool StampedPointCloud::filterByBoundingBox(const float xMin, const float xMax, const float yMin, const float yMax, const float zMin,
-                                            const float zMax, const bool keepInside)
-{
-    auto boundingBoxFilter = Pm::get().DataPointsFilterRegistrar.create("BoundingBoxDataPointsFilter",
-                                                                        { { "xMin", PointMatcherSupport::toParam(xMin) },
-                                                                          { "xMax", PointMatcherSupport::toParam(xMax) },
-                                                                          { "yMin", PointMatcherSupport::toParam(yMin) },
-                                                                          { "yMax", PointMatcherSupport::toParam(yMax) },
-                                                                          { "zMin", PointMatcherSupport::toParam(zMin) },
-                                                                          { "zMax", PointMatcherSupport::toParam(zMax) },
-                                                                          { "removeInside", PointMatcherSupport::toParam(!keepInside) } });
-    const bool success = filter(*boundingBoxFilter);
-    return success;
 }
 
 bool StampedPointCloud::filterByThresholding(const std::string& descriptorName, const unsigned int& descriptorDimension,
@@ -276,30 +305,54 @@ bool StampedPointCloud::add(const StampedPointCloud& other)
 {
     if (other.header_.frame_id != header_.frame_id)
     {
+#ifndef ROS2_BUILD
         ROS_ERROR_STREAM("Point cloud concatenation failed due to inconsistent frames. "
                          << "This frame: '" << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
+#else
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                            "Point cloud concatenation failed due to inconsistent frames. "
+                                << "This frame: '" << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
+#endif
         return false;
     }
 
     if (other.isEmpty())
     {
+#ifndef ROS2_BUILD
         ROS_WARN_STREAM("Point cloud to add is empty, concatenation is not executed.");
+#else
+        RCLCPP_WARN_STREAM(rclcpp::get_logger("PointmatcherRos"), "Point cloud to add is empty, concatenation is not executed.");
+#endif
     }
     else if (dataPoints_.features.rows() != other.dataPoints_.features.rows())
     {
+#ifndef ROS2_BUILD
         ROS_INFO_STREAM("Point clouds to concatenate have different features, overwriting them.");
+#else
+        RCLCPP_INFO_STREAM(rclcpp::get_logger("PointmatcherRos"), "Point clouds to concatenate have different features, overwriting them.");
+#endif
         dataPoints_ = other.dataPoints_;
     }
     else
     {
+#ifndef ROS2_BUILD
         ROS_DEBUG_STREAM("Concatenating point clouds of sizes " << getSize() << " and " << other.getSize() << " ...");
+#else
+        RCLCPP_DEBUG_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                            "Concatenating point clouds of sizes " << getSize() << " and " << other.getSize() << " ...");
+#endif
         try
         {
             dataPoints_.concatenate(other.dataPoints_);
         }
         catch (const std::exception& exception)
         {
+#ifndef ROS2_BUILD
             ROS_ERROR_STREAM("Caught exception while concatenating point clouds: " << exception.what());
+#else
+            RCLCPP_ERROR_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                                "Caught exception while concatenating point clouds: " << exception.what());
+#endif
             return false;
         }
     }
@@ -312,28 +365,11 @@ bool StampedPointCloud::add(const StampedPointCloud& other)
 
     //TODO(ynava) Introduce flag to decide whether the stamp should be overwritten. The behavior of this function is very non-explicit at the moment.
     // Update stamp for all of the above cases.
+#ifndef ROS2_BUILD
     header_.stamp = std::max(header_.stamp, other.header_.stamp);
-    return true;
-}
-
-bool StampedPointCloud::addNonOverlappingPoints(const StampedPointCloud& other, const float maxDistOverlappingPoints, PmMatches& matches)
-{
-    // Split up the other point cloud in overlapping and non-overlapping points.
-    StampedPointCloud otherOverlappingPoints;
-    StampedPointCloud otherNonOverlappingPoints;
-    if (!splitByOverlap(other, maxDistOverlappingPoints, matches, otherOverlappingPoints, otherNonOverlappingPoints))
-    {
-        ROS_ERROR_STREAM("Overlap could not be found.");
-        return false;
-    }
-
-    // Only add the non-overlapping points.
-    if (!add(otherNonOverlappingPoints))
-    {
-        ROS_ERROR_STREAM("Non-overlapping points could not be added.");
-        return false;
-    }
-
+#else
+    header_.stamp = std::max(rclcpp::Time(header_.stamp), rclcpp::Time(other.header_.stamp));
+#endif
     return true;
 }
 
@@ -342,8 +378,14 @@ bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const flo
 {
     if (other.header_.frame_id != header_.frame_id)
     {
+#ifndef ROS2_BUILD
         ROS_ERROR_STREAM("Point cloud finding overlap failed due to inconsistent frames. "
                          << "This frame: '" << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
+#else
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                            "Point cloud finding overlap failed due to inconsistent frames. This frame: '"
+                                << header_.frame_id << "', other frame: '" << other.header_.frame_id << "'.");
+#endif
         return false;
     }
 
@@ -360,7 +402,11 @@ bool StampedPointCloud::splitByOverlap(const StampedPointCloud& other, const flo
 
         if (matches.dists.cols() == 0u)
         {
+#ifndef ROS2_BUILD
             ROS_WARN("Matches container empty. NNS will be run");
+#else
+            RCLCPP_WARN(rclcpp::get_logger("PointmatcherRos"), "Matches container empty. NNS will be run");
+#endif
             // Build and populate NNS.
             matches = PmMatches(PmMatches::Dists(1, other.getSize()), PmMatches::Ids(1, other.getSize()));
             std::shared_ptr<NNS> featureNNS(
@@ -401,7 +447,12 @@ void StampedPointCloud::splitByThresholding(const std::string& descriptorName, c
     if (!descriptorExists(descriptorName))
     {
         // This can happen e.g. for empty maps.
+#ifndef ROS2_BUILD
         ROS_DEBUG_STREAM("The point cloud does not contain the descriptor '" << descriptorName << "'.");
+#else
+        RCLCPP_DEBUG_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                            "The point cloud does not contain the descriptor '" << descriptorName << "'.");
+#endif
         // Similar behavior as countStaticPoints(..):
         pointsOverThreshold = *this;
         pointsUnderThreshold = createSimilarEmpty();
@@ -435,7 +486,12 @@ unsigned int StampedPointCloud::countPointsOverThreshold(const std::string& desc
     if (!descriptorExists(descriptorName))
     {
         // This can happen e.g. for empty maps.
+#ifndef ROS2_BUILD
         ROS_DEBUG_STREAM("The point cloud does not contain the descriptor '" << descriptorName << "'.");
+#else
+        RCLCPP_DEBUG_STREAM(rclcpp::get_logger("PointmatcherRos"),
+                            "The point cloud does not contain the descriptor '" << descriptorName << "'.");
+#endif
         // Similar behavior as splitByThresholding(..):
         return getSize();
     }
@@ -466,7 +522,13 @@ PmMatrix StampedPointCloud::toSphericalCoordinates() const
 std::ostream& operator<<(std::ostream& ostream, const StampedPointCloud& pointCloud)
 {
     ostream << "Frame: " << pointCloud.header_.frame_id << "\n";
+#ifndef ROS2_BUILD
     ostream << "Stamp: " << pointCloud.header_.stamp.toSec() << "\n";
+#else
+    std::chrono::duration<double> seconds(pointCloud.header_.stamp.sec);
+    seconds += std::chrono::nanoseconds(pointCloud.header_.stamp.nanosec);
+    ostream << "Stamp: " << seconds.count() << "\n";
+#endif
     ostream << "Size: " << pointCloud.getSize() << "\n";
     ostream << "Is organized?: " << pointCloud.dataPoints_.isOrganized() << "\n";
     return ostream;

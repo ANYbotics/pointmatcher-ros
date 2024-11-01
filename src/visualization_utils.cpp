@@ -1,13 +1,23 @@
 
 #include "pointmatcher_ros/visualization_utils.h"
 
+#ifndef ROS2_BUILD
 #include <std_msgs/ColorRGBA.h>
+#else
+#include <std_msgs/msg/color_rgba.hpp>
+#endif
 
 namespace pointmatcher_ros
 {
 
+#ifndef ROS2_BUILD
 std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors(const StampedPointCloud& pointCloud,
                                                                                  const ros::Time& timestamp,
+#else
+std::optional<visualization_msgs::msg::Marker> generateMarkersForSurfaceNormalVectors(
+    const StampedPointCloud& pointCloud,
+    const rclcpp::Time& timestamp,
+#endif
                                                                                  const NormalVectorsMarkerGenerationParameters& parameters,
                                                                                  const RgbaColorMap::Values& color)
 {
@@ -17,25 +27,43 @@ std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors
     }
     if (!pointCloud.dataPoints_.descriptorExists(parameters.pointCloudFieldId_))
     {
+#ifndef ROS2_BUILD
         ROS_WARN("Point cloud has no normals descriptor. Publisher configuration or normal computation might be inconsistent.");
+#else
+        RCLCPP_WARN(rclcpp::get_logger("PointmatcherRos"),
+                    "Point cloud has no normals descriptor. Publisher configuration or normal computation might be inconsistent.");
+#endif
         return {};
     }
 
     /* Common values used for all visualizations */
     const PmDataPoints::Index numberOfPoints{ pointCloud.getSize() };
+#ifndef ROS2_BUILD
     std_msgs::ColorRGBA colorMsg;
+#else
+    std_msgs::msg::ColorRGBA colorMsg;
+#endif
     colorMsg.r = color[0];
     colorMsg.g = color[1];
     colorMsg.b = color[2];
     colorMsg.a = color[3];
 
     /* Vectors */
+#ifndef ROS2_BUILD
     visualization_msgs::Marker vectorsMarker;
+#else
+    visualization_msgs::msg::Marker vectorsMarker;
+#endif
     vectorsMarker.header.stamp = timestamp;
     vectorsMarker.header.frame_id = pointCloud.header_.frame_id;
     vectorsMarker.ns = parameters.vectorsMarkerNamespace_;
+#ifndef ROS2_BUILD
     vectorsMarker.action = visualization_msgs::Marker::ADD;
     vectorsMarker.type = visualization_msgs::Marker::LINE_LIST;
+#else
+    vectorsMarker.action = visualization_msgs::msg::Marker::ADD;
+    vectorsMarker.type = visualization_msgs::msg::Marker::LINE_LIST;
+#endif
     vectorsMarker.pose.orientation.w = 1.0;
     vectorsMarker.id = parameters.vectorsMarkerId_;
     vectorsMarker.scale.x = parameters.vectorsWidth_;
@@ -68,9 +96,17 @@ std::optional<visualization_msgs::Marker> generateMarkersForSurfaceNormalVectors
     return vectorsMarker;
 }
 
+#ifndef ROS2_BUILD
 std::optional<visualization_msgs::MarkerArray> generateMarkersForSurfaceNormalPatches(
+#else
+std::optional<visualization_msgs::msg::MarkerArray> generateMarkersForSurfaceNormalPatches(
+#endif
     const StampedPointCloud& pointCloud,
+#ifndef ROS2_BUILD
     const ros::Time& timestamp,
+#else
+    const rclcpp::Time& timestamp,
+#endif
     const NormalVectorsMarkerGenerationParameters& parameters,
     const RgbaColorMap::Values& color)
 {
@@ -80,19 +116,32 @@ std::optional<visualization_msgs::MarkerArray> generateMarkersForSurfaceNormalPa
     }
     if (!pointCloud.dataPoints_.descriptorExists(parameters.pointCloudFieldId_))
     {
+#ifndef ROS2_BUILD
         ROS_WARN("Point cloud has no normals descriptor. Publisher configuration or normal computation might be inconsistent.");
+#else
+        RCLCPP_WARN(rclcpp::get_logger("PointmatcherRos"),
+                    "Point cloud has no normals descriptor. Publisher configuration or normal computation might be inconsistent.");
+#endif
         return {};
     }
 
     /* Common values used for all visualizations */
     const std::size_t numberOfPoints{ pointCloud.getSize() };
+#ifndef ROS2_BUILD
     std_msgs::ColorRGBA colorMsg;
+#else
+    std_msgs::msg::ColorRGBA colorMsg;
+#endif
     colorMsg.r = color[0];
     colorMsg.g = color[1];
     colorMsg.b = color[2];
     colorMsg.a = color[3];
 
+#ifndef ROS2_BUILD
     visualization_msgs::MarkerArray markerArray;
+#else
+    visualization_msgs::msg::MarkerArray markerArray;
+#endif
     markerArray.markers.resize(numberOfPoints);
 
     const Eigen::Vector3f zAxis{ Eigen::Vector3f::UnitZ() };
@@ -104,8 +153,13 @@ std::optional<visualization_msgs::MarkerArray> generateMarkersForSurfaceNormalPa
         marker.header.stamp = timestamp;
         marker.header.frame_id = pointCloud.header_.frame_id;
         marker.ns = "leaf_planes";
+#ifndef ROS2_BUILD
         marker.action = visualization_msgs::Marker::ADD;
         marker.type = visualization_msgs::Marker::CUBE;
+#else
+        marker.action = visualization_msgs::msg::Marker::ADD;
+        marker.type = visualization_msgs::msg::Marker::CUBE;
+#endif
         marker.id = i;
         marker.color = colorMsg;
 

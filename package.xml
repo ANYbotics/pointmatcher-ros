@@ -1,31 +1,35 @@
-<package format="2">
+<?xml version='1.0' encoding='utf-8'?>
+<package format="3">
 
   <name>pointmatcher_ros</name>
-  <description>Bridge between libpointmatcher and ROS.</description>
   <version>1.4.23</version>
-  <maintainer email="rdiethelm@anybotics.com">Remo Diethelm</maintainer>
-  <maintainer email="ynava@anybotics.com">Yoshua Nava</maintainer>
+  <description>Bridge between libpointmatcher and ROS.</description>
   <author email="stephane.magnenat@mavt.ethz.ch">Stéphane Magnenat</author>
   <author>Francois Pomerleau</author>
+  <maintainer email="rdiethelm@anybotics.com">Remo Diethelm</maintainer>
+  <maintainer email="ynava@anybotics.com">Yoshua Nava</maintainer>
   <license>new BSD</license>
   <url>https://github.com/ANYbotics/pointmatcher-ros</url>
-
-  <buildtool_depend>catkin</buildtool_depend>
-
-<!--   <build_depend>cmake_clang_tools</build_depend> -->
-
+  <buildtool_depend condition="$ROS_VERSION == 1">catkin</buildtool_depend>
+  <buildtool_depend condition="$ROS_VERSION == 2">ament_cmake</buildtool_depend>
+<!--   <build_depend condition="$ROS_VERSION == 1">cmake_clang_tools</build_depend> -->
   <depend>boost</depend>
-  <depend>eigen_conversions</depend>
+  <depend condition="$ROS_VERSION == 1">eigen_conversions</depend>
   <depend>libpointmatcher</depend>
   <depend>nav_msgs</depend>
   <depend>pcl_conversions</depend>
-  <depend>roscpp</depend>
+  <depend condition="$ROS_VERSION == 1">roscpp</depend>
+  <depend condition="$ROS_VERSION == 2">rclcpp</depend>
   <depend>sensor_msgs</depend>
-  <depend>tf</depend>
-  <depend>tf_conversions</depend>
+  <depend condition="$ROS_VERSION == 1">tf</depend>
+  <depend condition="$ROS_VERSION == 1">tf_conversions</depend>
+  <depend condition="$ROS_VERSION == 2">tf2</depend>
+  <depend condition="$ROS_VERSION == 2">tf2_eigen</depend>
   <depend>visualization_msgs</depend>
-
-<!--   <test_depend>cmake_code_coverage</test_depend> -->
-  <test_depend>gtest</test_depend>
-
+<!--   <test_depend condition="$ROS_VERSION == 1">cmake_code_coverage</test_depend> -->
+  <test_depend condition="$ROS_VERSION == 1">gtest</test_depend>
+  <test_depend condition="$ROS_VERSION == 2">ament_cmake_gtest</test_depend>
+  <export>
+    <build_type condition="$ROS_VERSION == 2">ament_cmake</build_type>
+  </export>
 </package>

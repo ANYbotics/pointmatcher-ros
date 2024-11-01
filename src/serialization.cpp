@@ -2,18 +2,30 @@
 
 #include "pointmatcher_ros/serialization.h"
 
+#ifndef ROS2_BUILD
 // boost
 #include <boost/detail/endian.hpp>
+#else
+#include <boost/predef/other/endian.h>
+#endif
 
 namespace pointmatcher_ros
 {
 template<typename T>
+#ifndef ROS2_BUILD
 sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,
                                                    const ros::Time& stamp)
 {
-
     sensor_msgs::PointCloud2 rosCloud;
     typedef sensor_msgs::PointField PF;
+
+#else
+sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(typename PointMatcher<T>::DataPoints const& pmCloud, std::string const& frame_id,
+                                                        rclcpp::Time const& stamp)
+{
+    sensor_msgs::msg::PointCloud2 rosCloud;
+    typedef sensor_msgs::msg::PointField PF;
+#endif
 
     // check type and get sizes
     BOOST_STATIC_ASSERT(std::is_floating_point<T>::value);
@@ -164,11 +176,19 @@ sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T
     rosCloud.header.stamp = stamp;
     rosCloud.height = 1;
     rosCloud.width = pmCloud.features.cols();
+#ifndef ROS2_BUILD
 #ifdef BOOST_BIG_ENDIAN
     rosCloud.is_bigendian = true;
 #else // BOOST_BIG_ENDIAN
     rosCloud.is_bigendian = false;
 #endif // BOOST_BIG_ENDIAN
+#else
+#ifdef BOOST_BIG_ENDIAN_BYTE
+    rosCloud.is_bigendian = true;
+#else
+    rosCloud.is_bigendian = false;
+#endif
+#endif
     rosCloud.point_step = offset;
     rosCloud.row_step = rosCloud.point_step * rosCloud.width;
     rosCloud.is_dense = true;
@@ -272,9 +292,17 @@ sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T
     return rosCloud;
 }
 
+#ifndef ROS2_BUILD
 template sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg<float>(const PointMatcher<float>::DataPoints& pmCloud,
                                                                    const std::string& frame_id, const ros::Time& stamp);
 template sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg<double>(const PointMatcher<double>::DataPoints& pmCloud,
                                                                     const std::string& frame_id, const ros::Time& stamp);
-
+#else
+// TODO(apoghosov): it is generally a bad idea to have template definitions in .cpp ... has to be fixed after
+// https://godbolt.org/z/7fh39WTvM
+template sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg<float>(PointMatcher<float>::DataPoints const& pmCloud,
+                                                                        std::string const& frame_id, rclcpp::Time const& stamp);
+template sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg<double>(PointMatcher<double>::DataPoints const& pmCloud,
+                                                                         std::string const& frame_id, rclcpp::Time const& stamp);
+#endif
 } // namespace pointmatcher_ros

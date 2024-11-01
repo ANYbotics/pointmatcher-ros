@@ -2,7 +2,13 @@
 
 #include <optional>
 
+#ifndef ROS2_BUILD
 #include <ros/ros.h>
+#else
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <visualization_msgs/msg/marker.hpp>
+#endif
 
 #include <pointmatcher/PointMatcher.h>
 
@@ -64,7 +70,11 @@ public:
      * @param nodeHandle    ROS node handle.
      * @param parametersKey Key for the publisher parameters.
      */
+#ifndef ROS2_BUILD
     void advertiseFromRosParameters(ros::NodeHandle nodeHandle, const std::string& parametersKey);
+#else
+    void advertiseFromRosParameters(rclcpp::Node::SharedPtr const& nodeHandle, std::string const& parametersKey);
+#endif
 
     /**
      * @brief Advertises publishers with their configuration provided directly as function argument.
@@ -75,8 +85,13 @@ public:
      * @param latch           Whether the publisher should be latched.
      * @param publishNormals  Whether surface normal topics should be published (if available)
      */
+#ifndef ROS2_BUILD
     void advertiseFromTopicName(ros::NodeHandle nodeHandle, const std::string& topicName, int queueSize = 1, bool latch = false,
                                 bool publishNormals = false, ColorKey color = ColorKey::kWhite);
+#else
+    void advertiseFromTopicName(rclcpp::Node::SharedPtr const& nodeHandle, std::string const& topicName, int queueSize = 1,
+                                bool latch = false, bool publishNormals = false, ColorKey color = ColorKey::kWhite);
+#endif
 
     /**
      * @brief Whether the publisher is latched.
@@ -98,7 +113,11 @@ public:
      * @param pointCloud    The point cloud to publish.
      * @param targetStamp   Timestamp for publishing the data. If targetStamp == ros::Time(0), the original timestamp is used.
      */
+#ifndef ROS2_BUILD
     void publish(const StampedPointCloud& pointCloud, const ros::Time targetStamp = ros::Time(0)) const;
+#else
+    void publish(StampedPointCloud const& pointCloud, rclcpp::Time const& targetStamp = rclcpp::Time()) const;
+#endif
 
 private:
     /**
@@ -106,7 +125,11 @@ private:
      * 
      * @param nodeHandle  ROS node handle.
      */
+#ifndef ROS2_BUILD
     void setUpPublishers(ros::NodeHandle nodeHandle);
+#else
+    void setUpPublishers(rclcpp::Node::SharedPtr const& nodeHandle);
+#endif
 
     /**
      * @brief Publishes a point cloud.
@@ -114,7 +137,11 @@ private:
      * @param pointCloud  The point cloud to publish.
      * @param timestamp   Timestamp to publish the point cloud.
      */
+#ifndef ROS2_BUILD
     void publishPointCloud(const StampedPointCloud& pointCloud, const ros::Time& timestamp) const;
+#else
+    void publishPointCloud(StampedPointCloud const& pointCloud, rclcpp::Time const& timestamp) const;
+#endif
 
     /**
      * @brief Publishes the surface normals of a point cloud.
@@ -122,7 +149,11 @@ private:
      * @param pointCloud  The point cloud that provides the surface normals.
      * @param timestamp   Timestamp to publish the point cloud.
      */
+#ifndef ROS2_BUILD
     void publishSurfaceNormals(const StampedPointCloud& pointCloud, const ros::Time& timestamp) const;
+#else
+    void publishSurfaceNormals(StampedPointCloud const& pointCloud, rclcpp::Time const& timestamp) const;
+#endif
 
     //! Publisher parameters.
     Parameters parameters_;
@@ -131,8 +162,13 @@ private:
     RgbaColorMap colorMap_;
 
     //! ROS publishers.
+#ifndef ROS2_BUILD
     std::optional<ros::Publisher> pointCloudPublisher_;
     std::optional<ros::Publisher> normalsMarkersPublisher_;
+#else
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pointCloudPublisher_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr normalsMarkersPublisher_;
+#endif
 };
 
 } // namespace pointmatcher_ros

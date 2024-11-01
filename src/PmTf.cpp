@@ -12,42 +12,49 @@ PmTf::PmTf() : transformator_(std::shared_ptr<PmTransformator>(Pm::get().REG(Tra
     parameters_ = Pm::Matrix::Identity(4, 4);
 }
 
+#ifndef ROS2_BUILD
 PmTf PmTf::FromRosTfMsg(const geometry_msgs::TransformStamped& tfMsg)
+#else
+PmTf PmTf::FromRosTfMsg(geometry_msgs::msg::TransformStamped const& tfMsg)
+#endif
 {
     PmTf pmTf;
     pmTf.fromRosTfMsg(tfMsg);
     return pmTf;
 }
 
+#ifndef ROS2_BUILD
 void PmTf::fromRosTfMsg(const geometry_msgs::TransformStamped& tfMsg)
+#else
+void PmTf::fromRosTfMsg(geometry_msgs::msg::TransformStamped const& tfMsg)
+#endif
 {
     *this = convertRosTfMsgToPmTf(tfMsg);
 }
 
+#ifndef ROS2_BUILD
 geometry_msgs::TransformStamped PmTf::toRosTfMsg() const
 {
     geometry_msgs::TransformStamped tfMsg;
+#else
+geometry_msgs::msg::TransformStamped PmTf::toRosTfMsg() const
+{
+    geometry_msgs::msg::TransformStamped tfMsg;
+#endif
     toRosTfMsg(tfMsg);
     return tfMsg;
 }
 
+#ifndef ROS2_BUILD
 void PmTf::toRosTfMsg(geometry_msgs::TransformStamped& tfMsg) const
+#else
+void PmTf::toRosTfMsg(geometry_msgs::msg::TransformStamped& tfMsg) const
+#endif
 {
     tfMsg = convertPmTfToTfMsg(*this);
 }
 
-PmTf PmTf::FromRosTf(const tf::StampedTransform& tf)
-{
-    PmTf pmTf;
-    pmTf.fromRosTf(tf);
-    return pmTf;
-}
-
-void PmTf::fromRosTf(const tf::StampedTransform& tf)
-{
-    *this = convertRosTfToPmTf(tf);
-}
-
+#ifndef ROS2_BUILD
 tf::StampedTransform PmTf::toRosTf() const
 {
     tf::StampedTransform tf;
@@ -59,6 +66,7 @@ void PmTf::toRosTf(tf::StampedTransform& tf) const
 {
     tf = convertPmTfToTf(*this);
 }
+#endif
 
 PmTf PmTf::inverse() const
 {
@@ -70,19 +78,13 @@ PmTf PmTf::inverse() const
     return tf;
 }
 
-float PmTf::getRotationScaling() const
-{
-    return parameters_.topLeftCorner<3, 3>().determinant();
-}
-
-void PmTf::fixRotationScaling()
-{
-    transformator_->correctParameters(parameters_);
-}
-
 std::ostream& operator<<(std::ostream& ostream, const PmTf& tf)
 {
+#ifndef ROS2_BUILD
     ostream << "Stamp: " << tf.stamp_ << "\n";
+#else
+    ostream << "Stamp: " << tf.stamp_.seconds() << "\n";
+#endif
     ostream << "Source frame: " << tf.sourceFrameId_ << "\n";
     ostream << "Target frame: " << tf.targetFrameId_ << "\n";
     ostream << "Parameters:\n" << tf.parameters_ << "\n";

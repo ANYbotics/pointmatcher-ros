@@ -1,8 +1,5 @@
 #pragma once
 
-// ros
-#include <ros/console.h>
-
 // PointMatcher
 #include <pointmatcher/PointMatcher.h>
 
