@@ -156,6 +156,7 @@ set(PACKAGE_DEPENDENCIES
   nav_msgs
   rclcpp
   Boost
+  PCL
   tf2
   )
 
@@ -164,8 +165,6 @@ find_package(ament_cmake REQUIRED)
 foreach(PKG ${PACKAGE_DEPENDENCIES})
   find_package(${PKG} REQUIRED)
 endforeach()
-
-include(cmake/configExtras.cmake)
 
 ########################
 ## Library definition ##
@@ -182,6 +181,11 @@ add_library(${PROJECT_NAME} SHARED
   src/RosPointCloud2Deserializer.cpp
   src/StampedPointCloud.cpp
   src/visualization_utils.cpp
+  )
+
+target_link_libraries(${PROJECT_NAME}
+  pcl_common
+  pcl_io
   )
 
 target_include_directories(${PROJECT_NAME}
@@ -238,6 +242,6 @@ if(BUILD_TESTING)
 
 endif()
 
-ament_package(CONFIG_EXTRAS cmake/configExtras.cmake)
+ament_package()
 
 endif()
