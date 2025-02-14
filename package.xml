@@ -2,7 +2,7 @@
 <package format="3">
 
   <name>pointmatcher_ros</name>
-  <version>1.4.23</version>
+  <version>1.4.24</version>
   <description>Bridge between libpointmatcher and ROS.</description>
   <author email="stephane.magnenat@mavt.ethz.ch">Stéphane Magnenat</author>
   <author>Francois Pomerleau</author>
