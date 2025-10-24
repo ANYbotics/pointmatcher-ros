@@ -136,7 +136,7 @@ void StampedPointCloudPublisher::publish(StampedPointCloud const& pointCloud, rc
     if (targetStamp != ros::Time(0))
 #else
     rclcpp::Time timestamp(pointCloud.header_.stamp);
-    if (targetStamp != rclcpp::Time())
+    if (targetStamp.nanoseconds() != 0)
 #endif
     {
         timestamp = targetStamp;

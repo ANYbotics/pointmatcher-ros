@@ -133,7 +133,7 @@ sensor_msgs::msg::PointCloud2 StampedPointCloud::toRosMsg(rclcpp::Time const& st
 #ifndef ROS2_BUILD
     if (stamp != ros::Time(0))
 #else
-    if (stamp != rclcpp::Time())
+    if (stamp.nanoseconds() != 0)
 #endif
     {
         msg.header.stamp = stamp;
