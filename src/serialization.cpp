@@ -2,34 +2,16 @@
 
 #include "pointmatcher_ros/serialization.h"
 
-#ifndef ROS2_BUILD
-// boost
-#include <boost/detail/endian.hpp>
-#else
-#include <boost/predef/other/endian.h>
-#endif
-
 namespace pointmatcher_ros
 {
 template<typename T>
-#ifndef ROS2_BUILD
 sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg(const typename PointMatcher<T>::DataPoints& pmCloud, const std::string& frame_id,
                                                    const ros::Time& stamp)
 {
     sensor_msgs::PointCloud2 rosCloud;
     typedef sensor_msgs::PointField PF;
 
-#else
-sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(typename PointMatcher<T>::DataPoints const& pmCloud, std::string const& frame_id,
-                                                        rclcpp::Time const& stamp)
-{
-    sensor_msgs::msg::PointCloud2 rosCloud;
-    typedef sensor_msgs::msg::PointField PF;
-#endif
-
     // check type and get sizes
-    BOOST_STATIC_ASSERT(std::is_floating_point<T>::value);
-    BOOST_STATIC_ASSERT((std::is_same<T, long double>::value == false));
     uint8_t dataType;
     size_t scalarSize;
     if (typeid(T) == typeid(float))
@@ -42,8 +24,6 @@ sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(typename PointMatcher<T>
         dataType = PF::FLOAT64;
         scalarSize = 8;
     }
-
-    size_t timeSize = 4; // we split in two UINT32
 
     // build labels
 
@@ -133,62 +113,12 @@ sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(typename PointMatcher<T>
         inDescriptorPos += it->span;
     }
 
-    // time
-    bool hasTime(false);
-    for (auto it(pmCloud.timeLabels.begin()); it != pmCloud.timeLabels.end(); ++it)
-    {
-        PF pointField;
-        // if (it->text == "stamps")
-        if (it->text == "time")
-        {
-            hasTime = true;
-
-            // for Rviz view
-
-            pointField.datatype = PF::FLOAT32;
-
-            // pointField.datatype = PF::UINT32;
-            pointField.name = "elapsedTimeSec";
-            pointField.offset = offset;
-            pointField.count = 1;
-            rosCloud.fields.push_back(pointField);
-            offset += 4;
-
-            // Split time in two because there is not PF::UINT64
-            pointField.datatype = PF::UINT32;
-            pointField.name = it->text + "_splitTime_high32";
-            pointField.offset = offset;
-            pointField.count = 1;
-            rosCloud.fields.push_back(pointField);
-            offset += timeSize;
-
-            pointField.datatype = PF::UINT32;
-            pointField.name = it->text + "_splitTime_low32";
-            pointField.offset = offset;
-            pointField.count = 1;
-            rosCloud.fields.push_back(pointField);
-            offset += timeSize;
-        }
-    }
-
     // fill cloud with data
     rosCloud.header.frame_id = frame_id;
     rosCloud.header.stamp = stamp;
     rosCloud.height = 1;
     rosCloud.width = pmCloud.features.cols();
-#ifndef ROS2_BUILD
-#ifdef BOOST_BIG_ENDIAN
-    rosCloud.is_bigendian = true;
-#else // BOOST_BIG_ENDIAN
     rosCloud.is_bigendian = false;
-#endif // BOOST_BIG_ENDIAN
-#else
-#ifdef BOOST_BIG_ENDIAN_BYTE
-    rosCloud.is_bigendian = true;
-#else
-    rosCloud.is_bigendian = false;
-#endif
-#endif
     rosCloud.point_step = offset;
     rosCloud.row_step = rosCloud.point_step * rosCloud.width;
     rosCloud.is_dense = true;
@@ -196,7 +126,6 @@ sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(typename PointMatcher<T>
 
     const unsigned featureDim(pmCloud.features.rows() - 1);
     const unsigned descriptorDim(pmCloud.descriptors.rows());
-    const unsigned timeDim(pmCloud.times.rows());
 
     assert(descriptorDim == inDescriptorPos);
     const unsigned postColorPos(colorPos + colorCount);
@@ -245,44 +174,6 @@ sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(typename PointMatcher<T>
                 fPtr += scalarSize * descriptorDim;
             }
         }
-
-        // TODO: reactivate that properly
-        // if(isTime)
-        //{
-        //	for(unsigned d = 0; d<timeDim; d++)
-        //	{
-        //		const uint32_t nsec = (uint32_t) pmCloud.times(d,pt);
-        //		const uint32_t sec = (uint32_t) (pmCloud.times(d,pt) >> 32);
-        //		memcpy(fPtr, reinterpret_cast<const uint8_t*>(&sec), timeSize);
-        //		fPtr += timeSize;
-        //		memcpy(fPtr, reinterpret_cast<const uint8_t*>(&nsec), timeSize);
-        //		fPtr += timeSize;
-        //	}
-        //}
-        if (hasTime)
-        {
-            // PointCloud2 can not contain uint64_t variables
-            // uint32_t are used for publishing, pmCloud.times(0, pt)/1000 (time in micro seconds)
-
-            // uint32_t temp = (uint32_t)(pmCloud.times(0, pt)/(uint64_t)1000);
-
-            const size_t ptrSize = timeSize * timeDim;
-
-            // Elapsed time
-            const float elapsedTime = (float)(pmCloud.times(0, pt) - pmCloud.times(0, 0)) * 1e-9f;
-            memcpy(fPtr, reinterpret_cast<const uint8_t*>(&elapsedTime), ptrSize);
-            fPtr += ptrSize;
-
-            // high32
-            const uint32_t high32 = (uint32_t)(pmCloud.times(0, pt) >> 32);
-            memcpy(fPtr, reinterpret_cast<const uint8_t*>(&high32), ptrSize);
-            fPtr += ptrSize;
-
-            // low32
-            const uint32_t low32 = (uint32_t)(pmCloud.times(0, pt));
-            memcpy(fPtr, reinterpret_cast<const uint8_t*>(&low32), ptrSize);
-            fPtr += ptrSize;
-        }
     }
 
     // fill remaining information
@@ -292,17 +183,8 @@ sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg(typename PointMatcher<T>
     return rosCloud;
 }
 
-#ifndef ROS2_BUILD
 template sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg<float>(const PointMatcher<float>::DataPoints& pmCloud,
                                                                    const std::string& frame_id, const ros::Time& stamp);
 template sensor_msgs::PointCloud2 pointMatcherCloudToRosMsg<double>(const PointMatcher<double>::DataPoints& pmCloud,
                                                                     const std::string& frame_id, const ros::Time& stamp);
-#else
-// TODO(apoghosov): it is generally a bad idea to have template definitions in .cpp ... has to be fixed after
-// https://godbolt.org/z/7fh39WTvM
-template sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg<float>(PointMatcher<float>::DataPoints const& pmCloud,
-                                                                        std::string const& frame_id, rclcpp::Time const& stamp);
-template sensor_msgs::msg::PointCloud2 pointMatcherCloudToRosMsg<double>(PointMatcher<double>::DataPoints const& pmCloud,
-                                                                         std::string const& frame_id, rclcpp::Time const& stamp);
-#endif
 } // namespace pointmatcher_ros
