@@ -66,6 +66,30 @@ void PmTf::toRosTf(tf::StampedTransform& tf) const
 {
     tf = convertPmTfToTf(*this);
 }
+#else
+tf2::Transform PmTf::toRosTf() const
+{
+    tf2::Transform tf;
+    toRosTf(tf);
+    return tf;
+}
+
+void PmTf::toRosTf(tf2::Transform& tf) const
+{
+    tf2::Matrix3x3 basis(parameters_(0, 0),
+                         parameters_(0, 1),
+                         parameters_(0, 2),
+                         parameters_(1, 0),
+                         parameters_(1, 1),
+                         parameters_(1, 2),
+                         parameters_(2, 0),
+                         parameters_(2, 1),
+                         parameters_(2, 2));
+    tf.setBasis(basis);
+
+    tf2::Vector3 origin(parameters_(0, 3), parameters_(1, 3), parameters_(2, 3));
+    tf.setOrigin(origin);
+}
 #endif
 
 PmTf PmTf::inverse() const

@@ -18,6 +18,9 @@
 
 // geometry msgs
 #include <geometry_msgs/msg/transform_stamped.hpp>
+
+// tf2
+#include <tf2/LinearMath/Transform.h>
 #endif
 
 // pointmatcher_ros
@@ -57,6 +60,9 @@ public:
     void fromRosTfMsg(geometry_msgs::msg::TransformStamped const& tfMsg);
     geometry_msgs::msg::TransformStamped toRosTfMsg() const;
     void toRosTfMsg(geometry_msgs::msg::TransformStamped& tfMsg) const;
+
+    tf2::Transform toRosTf() const;
+    void toRosTf(tf2::Transform& tf) const;
 #endif
 
     PmTf inverse() const;

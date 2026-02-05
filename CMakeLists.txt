@@ -38,7 +38,7 @@ find_package(PCL REQUIRED
 
 # Catkin package macro
 catkin_package(
-  INCLUDE_DIRS 
+  INCLUDE_DIRS
     include
   LIBRARIES
     ${PROJECT_NAME}
@@ -137,7 +137,7 @@ if(cmake_clang_tools_FOUND)
       ${CMAKE_CURRENT_SOURCE_DIR}/include
       ${CMAKE_CURRENT_SOURCE_DIR}/src
       ${CMAKE_CURRENT_SOURCE_DIR}/test
-    CT_HEADER_FILTER 
+    CT_HEADER_FILTER
       ${CMAKE_CURRENT_SOURCE_DIR}/include
     CF_CONFIG_FILE
       ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format
@@ -221,9 +221,10 @@ ament_export_dependencies(${PACKAGE_DEPENDENCIES})
 if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
-  
+
   ament_add_gtest(test_${PROJECT_NAME}
     test/RosPointCloud2DeserializerTest.cpp
+    test/PmTfTest.cpp
     )
 
   target_link_libraries(test_${PROJECT_NAME}
