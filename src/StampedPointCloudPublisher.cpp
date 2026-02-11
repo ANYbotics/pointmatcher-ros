@@ -21,7 +21,7 @@ void StampedPointCloudPublisher::advertiseFromRosParameters(ros::NodeHandle node
         ROS_ERROR("Topic name for point cloud publisher could not be fetched from the ROS Parameter Server.");
         return;
     }
-    parameters_.queueSizeOfPublishers_ = nodeHandle.param("publishers/" + parametersKey + "/queue_size", false);
+    parameters_.queueSizeOfPublishers_ = nodeHandle.param("publishers/" + parametersKey + "/queue_size", 1);
     parameters_.latchPublishers_ = nodeHandle.param("publishers/" + parametersKey + "/latch", false);
     parameters_.publishSurfaceNormals_ = nodeHandle.param("publishers/" + parametersKey + "/surface_normals", false);
     parameters_.markersColor_ = static_cast<ColorKey>(
@@ -46,7 +46,7 @@ void StampedPointCloudPublisher::advertiseFromRosParameters(rclcpp::Node::Shared
     }
     try
     {
-        parameters_.queueSizeOfPublishers_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".queue_size", false);
+        parameters_.queueSizeOfPublishers_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".queue_size", 1);
         parameters_.latchPublishers_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".latch", false);
         parameters_.publishSurfaceNormals_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".surface_normals", false);
         parameters_.markersColor_ = static_cast<ColorKey>(
