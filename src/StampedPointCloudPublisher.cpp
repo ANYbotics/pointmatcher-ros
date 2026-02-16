@@ -32,7 +32,7 @@ void StampedPointCloudPublisher::advertiseFromRosParameters(rclcpp::Node::Shared
     bool success;
     try
     {
-        success = nodeHandle->get_parameter("publishers." + parametersKey + ".topic", parameters_.pointCloudPublisherTopic_);
+        success = nodeHandle->get_parameter<std::string>("publishers." + parametersKey + ".topic", parameters_.pointCloudPublisherTopic_);
     }
     catch (rclcpp::exceptions::InvalidParameterTypeException const&)
     {
@@ -46,11 +46,11 @@ void StampedPointCloudPublisher::advertiseFromRosParameters(rclcpp::Node::Shared
     }
     try
     {
-        parameters_.queueSizeOfPublishers_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".queue_size", 1);
-        parameters_.latchPublishers_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".latch", false);
-        parameters_.publishSurfaceNormals_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".surface_normals", false);
-        parameters_.markersColor_ = static_cast<ColorKey>(
-            nodeHandle->get_parameter_or("publishers." + parametersKey + ".surface_normals_color", static_cast<int>(ColorKey::kWhite)));
+        parameters_.queueSizeOfPublishers_ = nodeHandle->get_parameter_or<int>("publishers." + parametersKey + ".queue_size", 1);
+        parameters_.latchPublishers_ = nodeHandle->get_parameter_or<bool>("publishers." + parametersKey + ".latch", false);
+        parameters_.publishSurfaceNormals_ = nodeHandle->get_parameter_or<bool>("publishers." + parametersKey + ".surface_normals", false);
+        parameters_.markersColor_ = static_cast<ColorKey>(nodeHandle->get_parameter_or<int>(
+            "publishers." + parametersKey + ".surface_normals_color", static_cast<int>(ColorKey::kWhite)));
     }
     catch (rclcpp::exceptions::InvalidParameterTypeException const&)
     {

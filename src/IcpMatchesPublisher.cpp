@@ -39,9 +39,10 @@ void IcpMatchesPublisher::advertiseFromRosParameters(rclcpp::Node::SharedPtr con
     bool success;
     try
     {
-        success = nodeHandle->get_parameter("publishers." + parametersKey + ".reading_topic", parameters_.readingPointCloudPublisherTopic_)
-            && nodeHandle->get_parameter("publishers." + parametersKey + ".reference_topic",
-                                         parameters_.referencePointCloudPublisherTopic_);
+        success = nodeHandle->get_parameter<std::string>("publishers." + parametersKey + ".reading_topic",
+                                                         parameters_.readingPointCloudPublisherTopic_)
+            && nodeHandle->get_parameter<std::string>("publishers." + parametersKey + ".reference_topic",
+                                                      parameters_.referencePointCloudPublisherTopic_);
     }
     catch (rclcpp::exceptions::InvalidParameterTypeException const&)
     {
@@ -55,12 +56,12 @@ void IcpMatchesPublisher::advertiseFromRosParameters(rclcpp::Node::SharedPtr con
     }
     try
     {
-        parameters_.queueSizeOfPublishers_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".queue_size", 0);
-        parameters_.latchPublishers_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".latch", false);
-        parameters_.publishSurfaceNormals_ = nodeHandle->get_parameter_or("publishers." + parametersKey + ".surface_normals", false);
-        parameters_.readingMarkersColor_ = static_cast<ColorKey>(nodeHandle->get_parameter_or(
+        parameters_.queueSizeOfPublishers_ = nodeHandle->get_parameter_or<int>("publishers." + parametersKey + ".queue_size", 0);
+        parameters_.latchPublishers_ = nodeHandle->get_parameter_or<bool>("publishers." + parametersKey + ".latch", false);
+        parameters_.publishSurfaceNormals_ = nodeHandle->get_parameter_or<bool>("publishers." + parametersKey + ".surface_normals", false);
+        parameters_.readingMarkersColor_ = static_cast<ColorKey>(nodeHandle->get_parameter_or<int>(
             "publishers." + parametersKey + ".reading_surface_normals_color", static_cast<int>(ColorKey::kWhite)));
-        parameters_.referenceMarkersColor_ = static_cast<ColorKey>(nodeHandle->get_parameter_or(
+        parameters_.referenceMarkersColor_ = static_cast<ColorKey>(nodeHandle->get_parameter_or<int>(
             "publishers." + parametersKey + ".reference_surface_normals_color", static_cast<int>(ColorKey::kWhite)));
     }
     catch (rclcpp::exceptions::InvalidParameterTypeException const&)
