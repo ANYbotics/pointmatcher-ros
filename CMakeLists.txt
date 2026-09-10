@@ -13,6 +13,7 @@ if("$ENV{ROS_VERSION}" STREQUAL "1")
 set(CATKIN_PACKAGE_DEPENDENCIES
   eigen_conversions
   libpointmatcher
+  nanoflann_vendor
   nav_msgs
   pcl_conversions
   roscpp
@@ -151,6 +152,7 @@ set(PACKAGE_DEPENDENCIES
   visualization_msgs
   pcl_conversions
   libpointmatcher
+  nanoflann_vendor
   tf2_eigen
   sensor_msgs
   nav_msgs
@@ -181,11 +183,14 @@ add_library(${PROJECT_NAME} SHARED
   src/RosPointCloud2Deserializer.cpp
   src/StampedPointCloud.cpp
   src/visualization_utils.cpp
+  src/filters/FastSurfaceNormalDataPointsFilter.cpp
+  src/filters/register_filters.cpp
   )
 
 target_link_libraries(${PROJECT_NAME}
   pcl_common
   pcl_io
+  nanoflann_vendor::nanoflann
   )
 
 target_include_directories(${PROJECT_NAME}
@@ -225,10 +230,14 @@ if(BUILD_TESTING)
   ament_add_gtest(test_${PROJECT_NAME}
     test/RosPointCloud2DeserializerTest.cpp
     test/PmTfTest.cpp
+    test/FastSurfaceNormalAcceptanceTest.cpp
     )
 
   target_link_libraries(test_${PROJECT_NAME}
     ${PROJECT_NAME}
+    )
+  target_compile_definitions(test_${PROJECT_NAME} PRIVATE
+    POINTMATCHER_ROS_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test/data"
     )
 
   ###################

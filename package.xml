@@ -16,6 +16,7 @@
   <depend>boost</depend>
   <depend condition="$ROS_VERSION == 1">eigen_conversions</depend>
   <depend>libpointmatcher</depend>
+  <depend>nanoflann_vendor</depend>
   <depend>nav_msgs</depend>
   <depend>pcl_conversions</depend>
   <depend condition="$ROS_VERSION == 1">roscpp</depend>

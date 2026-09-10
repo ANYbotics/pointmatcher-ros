@@ -1,5 +1,6 @@
 
 #include "pointmatcher_ros/PointMatcherFilterInterface.h"
+#include "pointmatcher_ros/filters/register_filters.h"
 
 #ifndef ROS2_BUILD
 // ros
@@ -17,6 +18,7 @@ namespace pointmatcher_ros
 
 bool PointMatcherFilterInterface::readPipelineFile(const std::string& fileName)
 {
+    registerAnyboticsDataPointsFilters();
     std::ifstream inFile(fileName.c_str());
     if (!inFile.good())
     {
@@ -34,6 +36,7 @@ bool PointMatcherFilterInterface::readPipelineFile(const std::string& fileName)
 
 bool PointMatcherFilterInterface::readFiltersFromYamlNode(const YAML::Node& yamlNode)
 {
+    registerAnyboticsDataPointsFilters();
     if (!yamlNode)
     {
 #ifndef ROS2_BUILD
