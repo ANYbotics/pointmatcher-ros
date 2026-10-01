@@ -151,6 +151,8 @@ else() # ROS version 2
 set(PACKAGE_DEPENDENCIES
   visualization_msgs
   pcl_conversions
+  # yaml-cpp: ros-jazzy-libpointmatcher links yaml-cpp::yaml-cpp but its CMake config does not import it.
+  yaml-cpp
   libpointmatcher
   nanoflann_vendor
   tf2_eigen
