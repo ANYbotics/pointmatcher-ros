@@ -6,8 +6,7 @@
   <description>Bridge between libpointmatcher and ROS.</description>
   <author email="stephane.magnenat@mavt.ethz.ch">Stéphane Magnenat</author>
   <author>Francois Pomerleau</author>
-  <maintainer email="magostinucci@anybotics.com">Mathieu Agostinucci</maintainer>
-  <maintainer email="gzhou@anybotics.com">Guoxiang Zhou</maintainer>
+  <maintainer email="support@anybotics.com">ANYbotics</maintainer>
   <license>new BSD</license>
   <url>https://github.com/ANYbotics/pointmatcher-ros</url>
   <buildtool_depend condition="$ROS_VERSION == 1">catkin</buildtool_depend>
